@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Disallow: /assets/
+
+Sitemap: http://high-spring-901.herokuapp.com//sitemap.xml

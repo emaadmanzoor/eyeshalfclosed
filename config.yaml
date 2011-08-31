@@ -5,7 +5,7 @@ data_sources:
   items_root: /
   layouts_root: /
 enable_output_diff: false
-base_url: http://eyeshalfclosed.herokuapp.com/
+base_url: http://high-spring-901.herokuapp.com/
 google_analytics: 
   domain: 
   site_id: 
