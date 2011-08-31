@@ -4,6 +4,7 @@ data_sources:
 - type: filesystem_unified
   items_root: /
   layouts_root: /
+enable_output_diff: false
 base_url: http://eyeshalfclosed.herokuapp.com/
 google_analytics: 
   domain: 
