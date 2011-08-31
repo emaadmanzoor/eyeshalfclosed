@@ -1,0 +1,258 @@
+//// Variables
+$base_color: #202020
+$heading_color: $base_color
+$normal_color: #404040
+$passive_color: #606060
+
+// ruby per wikipedia
+$logo_color: #000000 
+$logo_background_color: #ffffff
+
+$link_color: $heading_color
+$link_hover_color: #D17600
+$link_bg: white
+
+$tag_color: $link_color
+
+$border_color: #bbbbbb
+
+//// Mixins
+
+=sans
+  font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif
+
+=serif
+  //font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif
+
+=logo-font
+  font-family: baskerville, palatino, "palatino linotype", georgia, serif
+
+=monospace
+  font-family: Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace
+
+=ul_left
+  ul
+    padding: 0
+    list-style-type: none
+
+//// Styles
+
+*
+  +serif
+  color: $normal_color
+
+body
+  font-size: 100% 
+  text-align: center
+
+#main
+  margin: auto
+  width: 40em
+  padding: 3em 0
+
+a
+  background-color: $link_bg
+  border-bottom: solid 1px $link_color
+  color: $link_color
+  text-decoration: none
+  margin: 2px
+  &:link, &:visited
+    color: $link_color
+  &:hover
+    color: $link_hover_color
+    text-decoration: none
+    border-bottom: solid 1px $link_hover_color
+
+code, pre
+  +monospace
+  color: $normal_color
+  font-size: 13px
+
+blockquote, div, ol, p, pre, ul
+  line-height: 1.5em
+  margin-bottom: 1.5em
+
+h1, h2, h3, h4, h5
+  +serif
+  color: $heading_color
+  font-weight: normal
+  a
+    +serif
+    color: $heading_color !important
+    text-decoration: none
+    border-bottom: none
+    &:hover
+      text-decoration: none
+      color: $link_hover_color !important
+
+h1
+  border-bottom: 1px solid #eeeeee
+  font-size: 1.8em
+  padding-bottom: 6px
+  margin-bottom: 1em
+
+h2, h3
+  color: $heading_color
+  margin: 1.5em 0 1em
+
+h2
+  font-size: 1.3em
+
+h3
+  font-size: 1.1em
+
+ol, ul
+  padding-left: 30px
+  li
+    line-height: 1.5em
+
+ul
+  list-style-type: circle
+
+ol
+  list-style-type: decimal
+
+pre
+  background-color: #f8f8f8
+  border-left: 3px double $border_color
+  padding: 0.5em
+
+#header
+  //margin-bottom: 2em
+  overflow: auto
+  .logo
+    background-color: $logo_background_color
+    color: $logo_color
+    font-size: 5em
+    letter-spacing: -0.06em
+    margin-bottom: 0
+    +logo-font
+    // css3 inset effect
+    text-shadow: 0px -1px 1px #aaa
+    a
+      +sans
+      color: $logo_color
+      background-color: $logo_background_color
+      border: none
+      +logo-font
+      text-decoration: none
+      &:link, &:visited
+        //color: #000 !important
+      &:hover
+        //color: #000 !important
+        border-bottom: solid 1px $logo_color
+        text-decoration: none
+  .article_logo
+    font-size: 2.5em
+    @extend .logo
+  #nav
+    margin-top: 10px
+    ul
+      li
+        display: inline
+  .byline
+    color: $passive_color
+
+#other-articles
+  margin-top: 4em
+  +ul_left
+  h3
+    margin: 0 0 0.5em
+  .newer
+    text-align: right
+    float: right
+  .older
+    float: left
+
+#taglist
+  font-size: 0.8em
+  margin-top: 3em
+  text-align: center 
+
+#sticky
+  //border: 3px double #eee
+  margin-bottom: 3.2em
+  .body
+    margin: auto
+    text-align: center
+    p
+      margin: 0
+      line-height: 4em
+
+.archives, .tag-page
+  .excerpt
+    font-size: 90%
+    margin: 0
+    h2
+      margin-top: 0
+  ul
+    list-style-type: none
+    padding-left: 0px
+
+.article, .excerpt, .featured
+  margin-bottom: 2.5em
+
+table.colophon
+  td:first-of-type
+    width: 175px
+
+.article, .featured
+  text-align: left
+  h1
+    border-bottom: none
+    font-size: 3em
+    letter-spacing: -0.05em
+    margin-bottom: 0.25em
+    margin-top: 1em
+    text-align: center
+
+.clear
+  clear: both
+
+.excerpt
+  margin-bottom: 1.5em
+  h2
+    margin-top: 1em
+    margin-bottom: 0.5em
+    font-size: 2.5em
+  p
+    margin: 0.4em auto
+    width: 80%
+
+.meta
+  font-size: 1em
+  text-align: center
+  ul
+    margin: 0px
+    padding-left: 0
+    li
+      color: $passive_color
+      display: inline
+
+.passive
+  color: $passive_color
+
+.page
+  text-align: left
+
+a.tag
+  color: $tag_color !important
+  padding: 0 0.1em 0
+  &:hover
+    color: $link_hover_color !important
+
+.tags
+  text-transform: lowercase
+
+.tags-page
+  +ul_left
+
+.screencast
+  text-align: center
+  border: 3px double #bbbbbb
+  padding-top: 30px
+  div:
+    padding: 0
+    margin-bottom: 0
+    font-size: 0.5em !important

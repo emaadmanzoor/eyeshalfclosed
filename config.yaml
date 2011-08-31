@@ -1,0 +1,15 @@
+--- 
+output_dir: output
+data_sources: 
+- type: filesystem_unified
+  items_root: /
+  layouts_root: /
+base_url: http://eyeshalfclosed.herokuapp.com/
+google_analytics: 
+  domain: 
+  site_id: 
+site_name: eyeshalfclosed [:)
+featured_count: 0
+excerpt_count: 6
+other_articles_max: 3
+disqus_shortname: eyeshalfclosed
