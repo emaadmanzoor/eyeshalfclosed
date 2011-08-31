@@ -13,7 +13,7 @@ site_name: eyeshalfclosed [:)
 featured_count: 0
 excerpt_count: 6
 other_articles_max: 1
-include_disqus_js: true
+include_disqus_js: false
 disqus_shortname: eyeshalfclosed
 use_facebook_comments: false
 use_github_comments: false
