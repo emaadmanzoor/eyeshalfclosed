@@ -1,3 +1,8 @@
+PATH
+  remote: ./gems/
+  specs:
+    nanoc-fuel (0.0.7)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -14,9 +19,6 @@ GEM
     multi_json (1.0.3)
     nanoc (3.2.1)
       nanoc3 (>= 3.2.1)
-    nanoc-fuel (0.0.6)
-      haml (>= 3.1.1)
-      nanoc (>= 3.1.6)
     nanoc3 (3.2.1)
       cri (~> 2.0)
     pandoc-ruby (0.4.1)
@@ -42,7 +44,7 @@ DEPENDENCIES
   haml
   mime-types
   nanoc
-  nanoc-fuel
+  nanoc-fuel (= 0.0.7)!
   pandoc-ruby
   rack
   rack-contrib
