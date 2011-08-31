@@ -166,18 +166,23 @@ table.colophon td:first-of-type {
   text-align: left; }
 
 .comments em {
-  text-decoration: none; }
+  text-decoration: none !important; }
 .comments a {
   border-bottom: none;
   background: transparent; }
-.comments .dsq-trackback-url {
+
+.dsq-trackback-url {
   margin-top: 1.3em;
   float: left; }
-.comments .dsq-pagination ul {
+
+.dsq-pagination ul {
   margin: 0; }
 
 .dsq-pagination {
+  display: block;
   float: right; }
+  .dsq-pagination .dsq-footer {
+    margin: 0; }
 
 .excerpt {
   margin-bottom: 1.5em; }
