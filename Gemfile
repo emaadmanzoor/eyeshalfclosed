@@ -11,7 +11,7 @@ group :development do
   gem 'adsf'
   gem 'haml'
   gem 'rake'
-  gem 'nanoc-fuel'
+  gem 'nanoc-fuel', :path => "gems/"
   gem 'pandoc-ruby'
   gem 'cri'
   gem 'rdiscount'

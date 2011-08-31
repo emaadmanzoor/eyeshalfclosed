@@ -14,6 +14,6 @@
   .body
     != content || partial(item)
 
-    = fb_init("265263273491887")
-    = fb_like_btn("standard", "450", "true", "true")
-    = fb_comments("eyeshalfclosed.heroku.com", "10", "360")
+-#.like_button
+-#  = fb_init(@config[:facebook_appid])    
+-#  = fb_like_btn("button_count", "40", "20", "false", "false")

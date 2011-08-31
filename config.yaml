@@ -5,12 +5,13 @@ data_sources:
   items_root: /
   layouts_root: /
 enable_output_diff: false
-base_url: http://high-spring-901.herokuapp.com/
+base_url: http://localhost:3000
 google_analytics: 
   domain: 
   site_id: 
 site_name: eyeshalfclosed [:)
 featured_count: 0
 excerpt_count: 6
-other_articles_max: 3
-disqus_shortname: eyeshalfclosed
+other_articles_max: 1
+use_facebook_comments: true
+facebook_appid: 265263273491887

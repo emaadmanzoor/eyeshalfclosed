@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /assets/
 
-Sitemap: http://high-spring-901.herokuapp.com//sitemap.xml
+Sitemap: http://localhost:3000/sitemap.xml

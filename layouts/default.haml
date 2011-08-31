@@ -56,27 +56,14 @@
         = render('_article', :item => @item, :content => content)
         = render('_other_articles_nav', :reference_item => @item)
         .clear
-        - if disqus_shortname && !is_front_page?
-          = render('_disqus', :item => @item)
+        - if @config[:use_facebook_comments] && !is_front_page?
+          = fb_init(@config[:facebook_appid])
+          = fb_comments("#{@config[:base_url]+route_path(item)}", "10", "600") 
       - elsif @item[:kind] == 'page'
         .page
           = content
       - else
         = content
       .clear
-
-    -# disqus: inserts number of commments     
-    - if @config[:include_disqus_js] == true
-      :javascript
-        (function() {
-          var links = document.getElementsByTagName('a');
-          var query = '?';
-          for(var i = 0; i < links.length; i++) {
-            if(links[i].href.indexOf('#disqus_thread') >= 0) {
-              query += 'url' + i + '=' + encodeURIComponent(links[i].href) + '&';
-            }
-          }
-          document.write('<script charset="utf-8" type="text/javascript" src="http://disqus.com/forums/#{disqus_shortname}/get_num_replies.js' + query + '"></' + 'script>');
-        })();
  
     = render('_ganalytics')
