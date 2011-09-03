@@ -11,6 +11,8 @@ group :development do
   gem 'adsf'
   gem 'haml'
   gem 'rake'
+  gem 'nokogiri'
+  gem 'coderay'
   gem 'nanoc-fuel', '=0.0.7', :path => "./gems/"
   gem 'pandoc-ruby'
   gem 'cri'
