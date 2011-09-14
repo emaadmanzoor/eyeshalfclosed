@@ -12,7 +12,13 @@
     end
   end
   def link_unless_current(s)
-    "<li><a href='/#{s}.html'>#{s}</a></li>" if @item.identifier != "/#{s}/" 
+    if s == "home"
+      if not is_front_page?
+        "<li><a href='/'>#{s}</a></li>" if @item.identifier != "/#{s}/"
+      end
+    else
+      "<li><a href='/#{s}.html'>#{s}</a></li>" if @item.identifier != "/#{s}/" 
+    end
   end
   def logo
     if is_front_page?
@@ -32,9 +38,7 @@
     %meta(name="viewport" content="width=320")
     %link(href="/assets/css/reset.css" rel="stylesheet" type="text/css")
     %link(href="/assets/css/style.css" media="screen" rel="stylesheet" type="text/css")
-    %script(src="http://github.github.com/github-flavored-markdown/scripts/showdown.js" type="text/javascript")
-    %script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript")
-    %script(src="http://datejs.googlecode.com/svn/trunk/build/date-en-US.js" type="text/javascript")
+
   %body
     -# needed since some content render <pre> blocks
     - content = find_and_preserve(yield)
@@ -42,17 +46,15 @@
       #header
         #nav
           %ul
+            != link_unless_current "home"
             != link_unless_current "about"
             != link_unless_current "archives"
-            != link_unless_current "colophon"
-            %li
-              %a(href='http://github.com/emaadmanzoor') code
             %li
               %a(href='/atom.xml') feed
         - if is_front_page?
           .logo
             = logo
-        - else
+        -#- else
           .article_logo
             = logo
       .clear

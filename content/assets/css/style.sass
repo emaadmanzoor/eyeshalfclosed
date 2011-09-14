@@ -78,6 +78,7 @@ h1, h2, h3, h4, h5
   +serif
   color: $heading_color
   font-weight: normal
+  line-height: 1em
   a
     +serif
     color: $heading_color !important
@@ -120,7 +121,7 @@ pre
   padding: 0.5em
 
 #header
-  //margin-bottom: 2em
+  margin-bottom: 3em
   .logo
     background-color: $logo_background_color
     color: $logo_color
@@ -149,7 +150,18 @@ pre
     font-size: 2.5em
     @extend .logo
   #nav
-    margin-top: 10px
+    margin-top: 0.8em
+    a
+      background-color: black
+      border: none
+      color: white
+      line-height: 2.5em
+      margin: 0.3em
+      padding: 0.5em 1em
+      -webkit-border-radius: 0.5em
+      &:hover
+        color: $link_hover_color
+        text-decoration: none
     ul
       list-style-type: none
       padding: 0
@@ -198,7 +210,7 @@ pre
 .article, .excerpt, .featured
   margin-bottom: 3.5em auto 2.5em auto
   .body
-    padding: 0 0.5em 0 1em
+    padding: 0 1em
 
 table.colophon
   td:first-of-type
@@ -210,6 +222,7 @@ table.colophon
     border-bottom: none
     font-size: 3em
     letter-spacing: -0.05em
+    line-height: 1em
     margin-bottom: 0.25em
     margin-top: 1em
     text-align: center
@@ -218,6 +231,7 @@ table.colophon
   clear: both
 
 .comments
+  padding-left: 1em
   text-align: left
 
 .comments
