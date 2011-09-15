@@ -1,0 +1,17 @@
+---
+is_hidden: true
+---
+-# Embeds clicky analyitics into the site
+- site_id = @config[:clicky_analytics][:site_id]
+- if site_id
+  :javascript
+    var clicky_site_ids = clicky_site_ids || [];
+    clicky_site_ids.push(#{site_id});
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = 'http://static.getclicky.com/js';
+      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+    })();
+      
