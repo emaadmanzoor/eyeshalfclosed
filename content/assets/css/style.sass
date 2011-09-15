@@ -65,10 +65,20 @@ a
     text-decoration: none
     border-bottom: solid 1px $link_hover_color
 
-code, pre
+pre
+  display: block
+  font-family: monospace
+  font-size: 1.1em
+  line-height: 1.4em !important
+  padding: 0 0 1.2em 0
+  white-space: pre
+
+pre span
+  font-family: monospace
+/* code, pre
   +monospace
   color: $normal_color
-  font-size: 13px
+  font-size: 13px */
 
 blockquote, div, ol, p, pre, ul
   line-height: 1.5em
@@ -115,10 +125,10 @@ ul
 ol
   list-style-type: decimal
 
-pre
+/* pre
   background-color: #f8f8f8
   border-left: 3px double $border_color
-  padding: 0.5em
+  padding: 0.5em */
 
 #header
   margin-bottom: 3em

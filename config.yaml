@@ -9,6 +9,8 @@ base_url: http://eyeshalfclosed.herokuapp.com
 google_analytics: 
   domain: 
   site_id: 
+clicky_analytics:
+  site_id: 66478673
 site_name: eyeshalfclosed [:)
 featured_count: 0
 excerpt_count: 6
@@ -17,4 +19,5 @@ include_disqus_js: true
 disqus_shortname: eyeshalfclosed
 use_facebook_comments: false
 use_github_comments: false
-facebook_appid: 265263273491887
+facebook_appid: 265263273491887647
+ultraviolet_theme: sunburst
