@@ -54,16 +54,16 @@ body
 
 a
   background-color: $link_bg
-  border-bottom: solid 1px $link_color
+  border-bottom: solid 0.1em $link_color
   color: $link_color
   text-decoration: none
-  margin: 2px
+  margin: 0.15em
   &:link, &:visited
     color: $link_color
   &:hover
     color: $link_hover_color
     text-decoration: none
-    border-bottom: solid 1px $link_hover_color
+    border-bottom: solid 0.1em $link_hover_color
 
 pre
   display: block
@@ -99,9 +99,9 @@ h1, h2, h3, h4, h5
       color: $link_hover_color !important
 
 h1
-  border-bottom: 1px solid #eeeeee
+  border-bottom: 0.1em solid #eeeeee
   font-size: 1.8em
-  padding-bottom: 6px
+  padding-bottom: 0.5em
   margin-bottom: 1em
 
 h2, h3
@@ -130,6 +130,12 @@ ol
   border-left: 3px double $border_color
   padding: 0.5em */
 
+#disqus_thread
+  overflow: hidden
+  ul
+    padding: 0
+    list-style-type: none
+ 
 #header
   margin-bottom: 3em
   .logo
@@ -141,7 +147,7 @@ ol
     overflow: hidden
     +logo-font
     // css3 inset effect
-    text-shadow: 0px -1px 1px #aaa
+    text-shadow: 0em -0.01em 0.05em #aaa
     word-wrap: break-word
     a
       +sans
@@ -154,7 +160,7 @@ ol
         //color: #000 !important
       &:hover
         //color: #000 !important
-        border-bottom: solid 1px $logo_color
+        border-bottom: solid 0.1em $logo_color
         text-decoration: none
   .article_logo
     font-size: 2.5em
@@ -217,16 +223,12 @@ ol
       margin-top: 0
   ul
     list-style-type: none
-    padding-left: 0px
+    padding-left: 0
 
 .article, .excerpt, .featured
   margin-bottom: 3.5em auto 2.5em auto
   .body
     padding: 0 1em
-
-table.colophon
-  td:first-of-type
-    width: 175px
 
 .article, .featured
   text-align: left
@@ -266,6 +268,8 @@ table.colophon
   content: attr(data-pullquote)
   float: right
   width: 10em
+  @media screen and (max-width: 480px)
+    width: 4em
   margin: 0.5em 1em
   font-size: 1.6em
   line-height: 1.6em
@@ -278,7 +282,7 @@ table.colophon
   font-size: 1em
   text-align: center
   ul
-    margin: 0px
+    margin: 0
     padding-left: 0
     li
       color: $passive_color
@@ -301,12 +305,3 @@ a.tag
 
 .tags-page
   +ul_left
-
-.screencast
-  text-align: center
-  border: 3px double #bbbbbb
-  padding-top: 30px
-  div:
-    padding: 0
-    margin-bottom: 0
-    font-size: 0.5em !important
