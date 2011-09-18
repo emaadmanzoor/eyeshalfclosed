@@ -9,7 +9,7 @@ base_url: http://eyeshalfclosed.herokuapp.com
 google_analytics: 
   domain: 
   site_id: 
-clicky_analytics:
+clicky_analytics: 
   site_id: 66478673
 site_name: eyeshalfclosed [:)
 featured_count: 0

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>About nanoc3_blog</title>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta content=', ' name='keywords'>
+    <meta content='' name='description'>
+    <meta content='width=320' name='viewport'>
+    <link href='/assets/css/reset.css' rel='stylesheet' type='text/css'>
+    <link href='/assets/css/sunburst.css' media='screen' rel='stylesheet' type='text/css'>
+    <link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id='main'>
+      <div id='header'>
+        <div id='nav'>
+          <ul>
+            <li><a href='/'>home</a></li>
+            
+            <li><a href='/archives.html'>archives</a></li>
+            <li>
+              <a href='http://feeds.feedburner.com/eyeshalfclosed'>feed</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class='clear'></div>
+      <div class='page'>
+        <p>nanoc3_blog is a <a href="http://nanoc.stoneship.org">nanoc3</a> blog starter kit for Ruby hackers.
+            The blog compiles into pure HTML. No javascript (keeping it simple). Ultra-fast and light. No database. No headaches. Host anywhere.</p>
+            
+            <p>Source is available from my <a href="http://github.com/mgutz/nanoc3_blog">nanoc3_blog</a> github repository.
+            Source is provided under the <a href="/license.html">FreeBSD License</a>.</p>
+            
+            <p>Features:</p>
+            
+            <ul>
+            <li>Minimalist CSS site</li>
+            <li>Uses file extension to determine filter:
+            <code>{'.erb' =&gt; :erb, '.md' =&gt; :rdiscount, '.markdown' =&gt; :rdiscount,'.haml' =&gt; :haml, '.sass' =&gt; :sass}</code></li>
+            <li>Configurable 0..n full articles on the front page</li>
+            <li>Configurable 0..n excerpted links on the front page</li>
+            <li>Tagging / generation of tag pages</li>
+            <li>Generates tags list</li>
+            <li>Generates archives list</li>
+            <li>Generates navigation links to articles by date</li>
+            <li><a href="http://www.disqus.com">DISQUS</a> commenting integration (optional)</li>
+            <li>RSS/atom feed</li>
+            <li>Generates sitemap.xml for SEO</li>
+            </ul>
+            
+            
+            <p>Interested? See <a href="/2010/01/15/getting_started_with_nanoc3_blog.html">Getting Started With nanoc3_blog</a>.</p>
+            
+            <h2>About The Author</h2>
+            
+            <p>My name is Mario Gutierrez aka <code>mgutz</code>. I like minimal-styled blogs.</p>
+            
+            <p>Visit <a href="http://mgutz.com">my blog</a></p>
+            
+            <h2>Thanks</h2>
+            
+            <p>Thanks to everyone in the
+            <a href="http://groups.google.com/group/nanoc">nanoc group</a>
+            for sample code.</p>
+            
+            <p>Thanks to <a href="http://stoneship.org/about/">Denis Defreyne</a>, author of nanoc.</p>
+            
+            <p>I tried <a href="http://www.ruby-toolbox.com/categories/static_website_generation.html">other compilers</a>
+            and chose nanoc3 for its architecture.</p>
+      </div>
+      <div class='clear'></div>
+    </div>
+    <script>
+          //<![CDATA[
+            (function() {
+              var links = document.getElementsByTagName('a');
+              var query = '?';
+              for(var i = 0; i < links.length; i++) {
+                if(links[i].href.indexOf('#disqus_thread') >= 0) {
+                  query += 'url' + i + '=' + encodeURIComponent(links[i].href) + '&';
+                }
+              }
+              document.write('<script charset="utf-8" type="text/javascript" src="http://disqus.com/forums/eyeshalfclosed/get_num_replies.js' + query + '"></' + 'script>');
+            })();
+          //]]>
+        </script>
+    <script>
+          //<![CDATA[
+            var clicky_site_ids = clicky_site_ids || [];
+            clicky_site_ids.push(66478673);
+            (function() {
+              var s = document.createElement('script');
+              s.type = 'text/javascript';
+              s.async = true;
+              s.src = 'http://static.getclicky.com/js';
+              ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+            })();
+          //]]>
+        </script>
+    
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>All Tags</title>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta content=', ' name='keywords'>
+    <meta content='' name='description'>
+    <meta content='width=320' name='viewport'>
+    <link href='/assets/css/reset.css' rel='stylesheet' type='text/css'>
+    <link href='/assets/css/sunburst.css' media='screen' rel='stylesheet' type='text/css'>
+    <link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id='main'>
+      <div id='header'>
+        <div id='nav'>
+          <ul>
+            <li><a href='/'>home</a></li>
+            <li><a href='/about.html'>about</a></li>
+            <li><a href='/archives.html'>archives</a></li>
+            <li>
+              <a href='http://feeds.feedburner.com/eyeshalfclosed'>feed</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class='clear'></div>
+      <h1>
+            All Tags
+          </h1>
+          <p>Listed are the set of tag links related to articles in this site. The number of articles related to a tag succeeds the tag.</p>
+          <div class='tags-page'>
+            <ul>
+              <li>
+                <a class='tag' href='/tags/eeech/'>eeech</a>
+                x 2
+              </li>
+              <li>
+                <a class='tag' href='/tags/goo/'>goo</a>
+                x 1
+              </li>
+              <li>
+                <a class='tag' href='/tags/roo/'>roo</a>
+                x 2
+              </li>
+              <li>
+                <a class='tag' href='/tags/weech/'>weech</a>
+                x 1
+              </li>
+            </ul>
+          </div>
+      <div class='clear'></div>
+    </div>
+    <script>
+          //<![CDATA[
+            (function() {
+              var links = document.getElementsByTagName('a');
+              var query = '?';
+              for(var i = 0; i < links.length; i++) {
+                if(links[i].href.indexOf('#disqus_thread') >= 0) {
+                  query += 'url' + i + '=' + encodeURIComponent(links[i].href) + '&';
+                }
+              }
+              document.write('<script charset="utf-8" type="text/javascript" src="http://disqus.com/forums/eyeshalfclosed/get_num_replies.js' + query + '"></' + 'script>');
+            })();
+          //]]>
+        </script>
+    <script>
+          //<![CDATA[
+            var clicky_site_ids = clicky_site_ids || [];
+            clicky_site_ids.push(66478673);
+            (function() {
+              var s = document.createElement('script');
+              s.type = 'text/javascript';
+              s.async = true;
+              s.src = 'http://static.getclicky.com/js';
+              ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+            })();
+          //]]>
+        </script>
+    
+  </body>
+</html>
