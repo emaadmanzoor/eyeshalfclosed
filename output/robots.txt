@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-
-Disallow: /assets/
-
-Sitemap: http://eyeshalfclosed.herokuapp.com/sitemap.xml

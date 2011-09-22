@@ -103,13 +103,14 @@ h1
   font-size: 1.8em
   padding-bottom: 0.5em
   margin-bottom: 1em
-  .title
-    border-bottom: none
-    font-size: 3em
-    letter-spacing: -0.05em
-    line-height: 0.5em
-    margin: 1em 0 0 0
-    text-align: center
+
+.title
+  border-bottom: none
+  font-size: 3em
+  letter-spacing: -0.05em
+  line-height: 0.5em
+  margin: 1em 0 0 0
+  text-align: center
 
 h2, h3
   color: $heading_color
@@ -167,6 +168,7 @@ ol
       &:hover
         //color: #000 !important
         //border-bottom: solid 0.1em $logo_color
+        color: $link_hover_color !important
         text-decoration: none
   .article_logo
     font-size: 2.5em
@@ -176,10 +178,18 @@ ol
     a
       border: none
       color: #555 
+      font-size: 1.3em
       font-variant: small-caps
+      &:hover
+        //color: #000 !important
+        //border-bottom: solid 0.1em $logo_color
+        color: $link_hover_color !important
+        text-decoration: none
     ul
+      line-height: 1em
       list-style-type: none
       padding: 0
+      margin: 0
       li
         display: inline
   .byline
@@ -247,7 +257,7 @@ ol
   margin-bottom: 1.5em
   h2
     margin-top: 1em
-    margin-bottom: 0.5em
+    margin-bottom: 0
     font-size: 2.5em
   p
     margin: 0.4em auto
@@ -269,6 +279,7 @@ ol
 
 .meta
   font-size: 1em
+  font-variant: small-caps
   text-align: center
   ul
     margin: 0

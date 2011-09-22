@@ -5,9 +5,9 @@
     %ul.tags
       %li
         = pretty_time(item[:created_at])
-        %li
+        -#%li
           &middot;
-        %li
+        -#%li
           %a(href="#{route_path(item)}#disqus_thread")
       - if item[:tags]
         %li &middot;
