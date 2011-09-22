@@ -37,7 +37,8 @@ use Rack::TryStatic,
 use Rack::Rewrite do
   r301 %r{.*}, 'http://www.eyeshalfclosed.com$&',
     :if => Proc.new { |rack_env| rack_env['SERVER_NAME'] != 'www.eyeshalfclosed.com' }
-  
+end
+
 errorFile = 'output/index.html'
 
 run lambda {
