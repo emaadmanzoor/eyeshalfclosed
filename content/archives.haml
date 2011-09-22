@@ -3,6 +3,9 @@ title: Archives
 is_hidden: true
 ---
 
+%h1{:class => ['page_title']}
+  Archives
+
 .archives
   - articles_by_year_month.each do |year, month_h|
     - month_h.each do |month, item_a|

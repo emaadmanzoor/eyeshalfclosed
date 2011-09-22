@@ -2,8 +2,8 @@
 title: About nanoc3_blog
 kind: page
 ---
-
-nanoc3\_blog is a [nanoc3](http://nanoc.stoneship.org) blog starter kit for Ruby hackers.
+<h1 class='page_title'>Colophon</h1>
+nanoc3\_blog is a  [nanoc3](http://nanoc.stoneship.org) blog starter kit for Ruby hackers.
 The blog compiles into pure HTML. No javascript (keeping it simple). Ultra-fast and light. No database. No headaches. Host anywhere.
 
 Source is available from my [nanoc3_blog](http://github.com/mgutz/nanoc3_blog) github repository.
