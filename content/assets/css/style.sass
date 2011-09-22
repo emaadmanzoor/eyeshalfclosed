@@ -12,7 +12,7 @@ $link_color: $heading_color
 $link_hover_color: #D17600
 $link_bg: white
 
-$tag_color: $link_color
+$tag_color: #555
 
 $border_color: #bbbbbb
 
@@ -54,7 +54,7 @@ body
 
 a
   background-color: $link_bg
-  border-bottom: solid 0.1em $link_color
+  border-bottom: solid 0.05em $link_color
   color: $link_color
   text-decoration: none
   margin: 0.15em
@@ -63,14 +63,14 @@ a
   &:hover
     color: $link_hover_color
     text-decoration: none
-    border-bottom: solid 0.1em $link_hover_color
+    //border-bottom: solid 0.1em $link_hover_color
 
 pre
   display: block
   font-family: monospace
   font-size: 1.2em
   line-height: 1.4em !important
-  padding: 1em 0 1.9em 0
+  padding: 1em 0
   white-space: pre
 
 pre span
@@ -103,6 +103,13 @@ h1
   font-size: 1.8em
   padding-bottom: 0.5em
   margin-bottom: 1em
+  .title
+    border-bottom: none
+    font-size: 3em
+    letter-spacing: -0.05em
+    line-height: 0.5em
+    margin: 1em 0 0 0
+    text-align: center
 
 h2, h3
   color: $heading_color
@@ -137,7 +144,6 @@ ol
     list-style-type: none
  
 #header
-  margin-bottom: 3em
   .logo
     background-color: $logo_background_color
     color: $logo_color
@@ -160,26 +166,17 @@ ol
         //color: #000 !important
       &:hover
         //color: #000 !important
-        border-bottom: solid 0.1em $logo_color
+        //border-bottom: solid 0.1em $logo_color
         text-decoration: none
   .article_logo
     font-size: 2.5em
     @extend .logo
   #nav
-    margin-top: 0.8em
+    margin-bottom: 0 !important
     a
-      background-color: black
       border: none
-      color: white
-      line-height: 2.5em
-      margin: 0.3em
-      padding: 0.5em 1em
-      -webkit-border-radius: 0.5em
-      -moz-border-radius: 0.5em
-      border-radius: 0.5em
-      &:hover
-        color: $link_hover_color
-        text-decoration: none
+      color: #555 
+      font-variant: small-caps
     ul
       list-style-type: none
       padding: 0
@@ -232,15 +229,7 @@ ol
 
 .article, .featured
   text-align: left
-  h1
-    border-bottom: none
-    font-size: 3em
-    letter-spacing: -0.05em
-    line-height: 1em
-    margin-bottom: 0.25em
-    margin-top: 1em
-    text-align: center
-
+  
 .clear
   clear: both
 
@@ -295,6 +284,7 @@ ol
   text-align: left
 
 a.tag
+  border-bottom: 0
   color: $tag_color !important
   padding: 0 0.1em 0
   &:hover
