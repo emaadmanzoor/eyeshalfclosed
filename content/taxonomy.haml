@@ -1,0 +1,18 @@
+---
+title: All Tags
+is_hidden: true
+---
+
+%h1{:class => ['page_title']}
+  Taxonomy
+ 
+.tags-page
+  - tags = count_tags()
+  %ul
+    - tags.sort_by{|k,v| k}.each do |tag_count|
+      - tag = tag_count[0]
+      - count = tag_count[1]
+      %li
+        %h2
+          %a(href="/tags/#{tag}/" class='tag')= tag
+          = "x #{count}"

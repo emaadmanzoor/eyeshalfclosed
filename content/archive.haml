@@ -1,0 +1,19 @@
+---
+title: Archives
+is_hidden: true
+---
+
+%h1{:class => ['page_title']}
+  Archive
+
+.archives
+  - articles_by_year_month.each do |year, month_h|
+    - month_h.each do |month, item_a|
+      %h1{:class => ['archive_month']}
+        = "#{to_month_s(month)} #{year}"
+      %ul
+        - item_a.each do |item|
+          %li
+            - url = "#{route_path(item)}"
+            %h3 
+              %a(href="#{url}" title="Full article" class="permalink")= "#{item[:title]}"

@@ -12,13 +12,7 @@
     end
   end
   def link_unless_current(s)
-    if s == "home"
-      if not is_front_page?
-        "<li><a href='/'>#{s}</a></li>" if @item.identifier != "/#{s}/"
-      end
-    else
-      "<li><a href='/#{s}.html'>#{s}</a></li>" if @item.identifier != "/#{s}/" 
-    end
+    "<li><a href='/#{s}.html'>#{s}</a></li><li>&middot;</li>" if @item.identifier != "/#{s}/" 
   end
   def logo
     if is_front_page?
@@ -47,9 +41,10 @@
       #header
         #nav
           %ul
-            != link_unless_current "home"
-            != link_unless_current "about"
-            != link_unless_current "archives"
+            - if not is_front_page?
+              != link_unless_current "index"
+            != link_unless_current "taxonomy"
+            != link_unless_current "archive"
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
         - if is_front_page?
@@ -58,7 +53,6 @@
         -#- else
           .article_logo
             = logo
-      .clear
 
       - if @item[:kind] == 'article'
         = render('_article', :item => @item, :content => content)
