@@ -18,7 +18,8 @@ require 'time'
 # 
 def route_path(item)
   # in-memory items have not file
-  return item.identifier + "index.html" if item[:content_filename].nil?
+  subdirectory = "/blog/"
+  return item.identifier + subdirectory + "index.html" if item[:content_filename].nil?
   
   url = item[:content_filename].gsub(/^content/, '')
  
@@ -38,7 +39,7 @@ def route_path(item)
     url = url.split('_').join('/')  # /2010/01/01-some_title.html -> /2010/01/01/some_title.html
   end
 
-  url
+  subdirectory + url
 end
 
 # Creates in-memory tag pages from partial: layouts/_tag_page.haml
