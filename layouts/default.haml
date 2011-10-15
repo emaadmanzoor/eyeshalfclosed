@@ -43,17 +43,25 @@
           %ul
             - if not is_front_page?
               != link_unless_current "index"
-            - if @item[:kind] != 'article'
+            - if is_front_page?
               != link_unless_current "taxonomy"
             != link_unless_current "archive"
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
+            - if is_front_page?
+              %li
+                &middot;
+              %li
+                #search
+                  %form{:method => 'post'}
+                    %input{:type => 'text', :name => 'query'}
         - if is_front_page?
           .logo
             = logo
         -#- else
           .article_logo
             = logo
+
 
       - if @item[:kind] == 'article'
         = render('_article', :item => @item, :content => content)
@@ -71,12 +79,7 @@
           = content
       - else
         = content
-      .clear
-      - if is_front_page?
-        #search
-          %form{:method => ['post']}
-            %input{:type => ['text'], :name => ['query']}
-
+      
     -# disqus: inserts number of commments     
     - if @config[:include_disqus_js] == true
       :javascript

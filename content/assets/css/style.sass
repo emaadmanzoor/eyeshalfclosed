@@ -50,7 +50,7 @@ body
   margin: auto
   width: 90%
   max-width: 40em
-  padding: 3em 0.5em
+  padding: 3em 0.5em 0 0.5em
 
 a
   background-color: $link_bg
@@ -219,12 +219,14 @@ ol
 
 #search
   display: inline-block
-  margin: 1em 0
+  margin: 0 0 0 0.5em
   input
-    background: url("/assets/images/searchicon.png") no-repeat scroll 0 0 white
+    background: url("/assets/images/searchicon.png") no-repeat scroll left center white
     border: 0.05em dashed #aaa
+    font-size: 0.8em
     font-variant: small-caps
     padding: 0.3em 2em
+    max-width: 5em
 
 #taglist
   font-size: 0.8em
