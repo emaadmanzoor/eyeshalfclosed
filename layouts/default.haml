@@ -43,7 +43,8 @@
           %ul
             - if not is_front_page?
               != link_unless_current "index"
-            != link_unless_current "taxonomy"
+            - if @item[:kind] != 'article'
+              != link_unless_current "taxonomy"
             != link_unless_current "archive"
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
@@ -60,18 +61,22 @@
         .clear
         - if disqus_shortname && !is_front_page?
           = render('_disqus', :item => @item)
-        - if @item[:issue] && @config[:use_github_comments]
-          = render('_github_comments', :issue => @issue)
-        - if @config[:use_facebook_comments] && !is_front_page?
-          = fb_init(@config[:facebook_appid])
-          = fb_comments("#{@config[:base_url]+route_path(item)}", "10", "650") 
+        //- if @item[:issue] && @config[:use_github_comments]
+        //  = render('_github_comments', :issue => @issue)
+        //- if @config[:use_facebook_comments] && !is_front_page?
+        //  = fb_init(@config[:facebook_appid])
+        //  = fb_comments("#{@config[:base_url]+route_path(item)}", "10", "650") 
       - elsif @item[:kind] == 'page'
         .page
           = content
       - else
         = content
       .clear
- 
+      - if is_front_page?
+        #search
+          %form{:method => ['post']}
+            %input{:type => ['text'], :name => ['query']}
+
     -# disqus: inserts number of commments     
     - if @config[:include_disqus_js] == true
       :javascript
@@ -87,4 +92,4 @@
         })();
  
     = render('_clicky_analytics')
-    = render('_ganalytics')
+    //= render('_ganalytics')
