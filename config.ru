@@ -35,7 +35,7 @@ module ::Rack
 end
 
 use Rack::TryStatic,
-    :root => "output/blog",
+    :root => "output",
     :urls => %w[/],
     :try  => ['.html', 'index.html', '/index.html']
 
