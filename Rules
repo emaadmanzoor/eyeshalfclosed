@@ -14,7 +14,6 @@ compile '/assets/css/*/' do
 end
 
 compile '*' do
-  filter :relativize_paths, :type => :html
   # item[:extension] returns 'html.erb' for multi-dotted filename
   ext = item[:extension].nil? ? nil : item[:extension].split('.').last
  
@@ -34,6 +33,7 @@ compile '*' do
   item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
 
   layout 'default' unless item[:layout] == "none"
+  filter :relativize_paths, :type => :html
 end
 
 route '/assets/css/*/' do
