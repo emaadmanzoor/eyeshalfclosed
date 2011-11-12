@@ -48,10 +48,10 @@
             != link_unless_current "archive"
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
-            - if is_front_page?
-              %li
+            -#- if is_front_page?
+              -#%li
                 &middot;
-              %li
+              -#%li
                 #search
                   %form{:method => 'post'}
                     %input{:type => 'text', :name => 'query'}
