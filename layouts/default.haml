@@ -12,7 +12,7 @@
     end
   end
   def link_unless_current(s)
-    "<li><a href='/#{s}.html'>#{s}</a></li><li>&middot;</li>" if @item.identifier != "/#{s}/" 
+    "<li><a href='/#{s}/'>#{s}</a></li><li>&middot;</li>" if @item.identifier != "/#{s}/" 
   end
   def logo
     if is_front_page?
@@ -42,7 +42,11 @@
         #nav
           %ul
             - if not is_front_page?
-              != link_unless_current "index"
+              %li
+                %a(href="/")
+                  index
+              %li
+                &middot;
             - if is_front_page?
               != link_unless_current "taxonomy"
             != link_unless_current "archive"

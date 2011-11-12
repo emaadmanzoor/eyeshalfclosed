@@ -16,28 +16,42 @@ end
 compile '*' do
   # item[:extension] returns 'html.erb' for multi-dotted filename
   ext = item[:extension].nil? ? nil : item[:extension].split('.').last
- 
-  if ext == 'erb'
-    filter :erb
-  elsif ext == 'haml' || ext.nil?
-    filter :haml
-  elsif ext == 'md' || ext == 'markdown'
-    filter :erb
-    filter :ultraviolet
-    filter :rdiscount
-  else
-    raise "Filter is not configured for #{item.identifier} in Rules file."
+  
+  if !item.binary?
+    if ext == 'erb'
+      filter :erb
+    elsif ext == 'haml' || ext.nil?
+      filter :haml
+    elsif ext == 'md' || ext == 'markdown'
+      filter :erb
+      filter :ultraviolet
+      filter :rdiscount
+    else
+      raise "Filter is not configured for #{item.identifier} in Rules file."
+    end
+
+    # use layouts with .html extension or layout specified in meta
+    item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
+
+    layout 'default' unless item[:layout] == "none"
+    filter :relativize_paths, :type => :html
   end
-
-  # use layouts with .html extension or layout specified in meta
-  item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
-
-  layout 'default' unless item[:layout] == "none"
-  filter :relativize_paths, :type => :html
 end
 
 route '/assets/css/*/' do
   item.identifier.chop + '.css'
+end
+
+route '/articles/*/*' do
+  if !item.binary?
+    date = Time.parse(item[:created_at])
+    slug = item.identifier.split(/\/|_/).last
+    '/' + date.strftime('%Y/%m/%d') + '/' + slug + '/' + 'index.html'
+  else
+    asset_name = item.raw_filename.split('/').last
+    directory = item.raw_filename.split('/')[-2].split('_').join('/')
+    '/' + directory + '/' + asset_name
+  end
 end
 
 route '*' do

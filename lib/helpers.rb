@@ -29,8 +29,12 @@ def route_path(item)
     outext = '' # remove 2nd extension
   elsif extname == ".sass"
     outext = '.css'
-  else
-    outext = '.html'
+  elsif extname == ".haml" or extname == ".md"
+    if item.identifier != '/'
+      outext = '/index.html'
+    else
+      outext = '.html'
+    end
   end
   url.gsub!(extname, outext)
   
@@ -39,6 +43,12 @@ def route_path(item)
   end
 
   url
+end
+
+def get_article_path(item)
+    date = Time.parse(item[:created_at])
+    slug = item.identifier.split(/\/|_/).last
+    '/' + date.strftime('%Y/%m/%d') + '/' + slug + '/'  
 end
 
 # Creates in-memory tag pages from partial: layouts/_tag_page.haml
@@ -80,7 +90,7 @@ end
 
 # Copy static assets outside of content instead of having nanoc3 process them.
 def copy_static
-  FileUtils.cp_r 'static/.', 'output/' 
+  FileUtils.cp_r 'static/.', 'output/blog/' 
 end
 
 def partial(identifier_or_item)

@@ -14,6 +14,6 @@ is_hidden: true
       %ul
         - item_a.each do |item|
           %li
-            - url = "#{route_path(item)}"
+            - url = "#{get_article_path(item)}"
             %h3 
               %a(href="#{url}" title="Full article" class="permalink")= "#{item[:title]}"

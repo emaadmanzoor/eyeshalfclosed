@@ -39,7 +39,7 @@ use Rack::TryStatic,
     :urls => %w[/],
     :try  => ['.html', 'index.html', '/index.html']
 
-errorFile = 'output/index.html'
+errorFile = 'output/404.html'
 
 run lambda {
   [404, {

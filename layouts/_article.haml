@@ -5,7 +5,7 @@
 .article
   %h1{:class => ['article_title']}
     - if is_embedded
-      %a(href="#{route_path(item)}" title="Full article" class="permalink")= item[:title]
+      %a(href="#{get_article_path(item)}" title="Full article" class="permalink")= item[:title]
     - else
       = item[:title]
   

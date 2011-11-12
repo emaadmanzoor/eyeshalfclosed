@@ -1,11 +1,11 @@
 --- 
-output_dir: output
+output_dir: output/blog
 data_sources: 
 - type: filesystem_unified
   items_root: /
   layouts_root: /
 enable_output_diff: false
-base_url: http://localhost:3000/
+base_url: http://0.0.0.0:3000/
 google_analytics: 
   domain: 
   site_id: 
