@@ -1,0 +1,79 @@
+* {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  color: #404040; }
+
+body {
+  font-size: 100%;
+  text-align: center;
+}
+
+#main {
+  display: block;
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  width: 15em;
+}
+
+a {
+  background-color: white;
+  border-bottom: solid 0.05em #202020;
+  color: #202020;
+  text-decoration: none;
+  margin: 0.15em; }
+  a:link, a:visited {
+    color: #202020; }
+  a:hover {
+    color: #993300;
+    text-decoration: none; }
+
+/* code, pre
+ * +monospace
+ * color: $normal_color
+ * font-size: 13px */
+blockquote, div, ol, p, pre, ul {
+  line-height: 1.5em;
+  margin-bottom: 1.5em; }
+
+#header .logo, #header .article_logo {
+  background-color: white;
+  color: #993300;
+  font-size: 5em;
+  letter-spacing: -0.06em;
+  line-height: 1.4em;
+  margin-bottom: 0;
+  overflow: hidden;
+  font-family: baskerville, palatino, "palatino linotype", georgia, serif;
+  text-shadow: 0em -0.01em 0.05em #aaaaaa;
+  word-wrap: break-word; }
+  #header .logo a, #header .article_logo a {
+    font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+    color: #993300;
+    background-color: white;
+    border: none;
+    font-family: baskerville, palatino, "palatino linotype", georgia, serif;
+    text-decoration: none; }
+    #header .logo a:hover, #header .article_logo a:hover {
+      color: #993300 !important;
+      text-decoration: none; }
+
+#header #nav {
+  margin-bottom: 0.5em !important; }
+  #header #nav a {
+    border: none;
+    color: #555555;
+    font-size: 1.3em;
+    font-variant: small-caps; }
+    #header #nav a:hover {
+      color: #993300 !important;
+      text-decoration: none; }
+  #header #nav ul {
+    line-height: 1em;
+    list-style-type: none;
+    padding: 0;
+    margin: 0; }
+    #header #nav ul li {
+      display: inline; }
