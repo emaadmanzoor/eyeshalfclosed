@@ -1,9 +1,9 @@
 ---
 created_at: 2011-08-28
-excerpt: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+excerpt: Inline tags are a lot cooler than those devoid if context, so says the quick brown fox. 
 kind: article
 publish: true
-tags: [fox]
+tags: [quick, brown, fox]
 title: "The Quick Brown Fox"
 ---
 <p class="has-pullquote" data-pullquote="Testing the goodness of HTML5 pullquotes">

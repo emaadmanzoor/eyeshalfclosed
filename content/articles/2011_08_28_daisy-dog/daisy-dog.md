@@ -1,6 +1,6 @@
 ---
 created_at: 2011-08-28
-excerpt: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+excerpt: Yet another article about a cat in a hat 
 kind: article
 publish: true
 tags: [cat, hat]

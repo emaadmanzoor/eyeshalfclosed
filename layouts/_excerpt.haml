@@ -1,11 +1,20 @@
 ---
 ---
+:ruby
+  def linkify
+    excerpt = item[:excerpt]
+    if item[:tags]
+      item[:tags].each do |tag|
+        excerpt = excerpt.gsub(/#{tag}/, "<a href='/tags/#{tag}/' class='tag'>#{tag}</a>")
+      end
+    end
+    return excerpt
+  end
+
 .excerpt
   - url = "#{get_article_path(item)}"
   %h2 
     %a(href="#{url}" title="Full article" class="permalink")= "#{item[:title]}"
   .body
     %p
-      = item[:excerpt] || "!!! Missing excerpt metadata for <code>#{item[:file].path}</code>"
-  -# = render('_meta', :item => item)
-    
+      = linkify || "!!! Missing excerpt metadata for <code>#{item[:file].path}</code>"
