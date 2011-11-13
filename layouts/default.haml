@@ -83,7 +83,18 @@
           = content
       - else
         = content
-      
+     
+      #footer
+        Built with   
+        %a(href="http://nanoc.stoneship.org/")
+          nanoc
+        and hosted by 
+        %a(href="www.heroku.com")
+          Heroku
+        %br
+        Realtime analytics by 
+        = render('_clicky_analytics')     
+    
     -# disqus: inserts number of commments     
     - if @config[:include_disqus_js] == true
       :javascript
@@ -97,6 +108,3 @@
           }
           document.write('<script charset="utf-8" type="text/javascript" src="http://disqus.com/forums/#{disqus_shortname}/get_num_replies.js' + query + '"></' + 'script>');
         })();
- 
-    = render('_clicky_analytics')
-    //= render('_ganalytics')

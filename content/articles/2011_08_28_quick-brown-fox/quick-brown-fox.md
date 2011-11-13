@@ -1,6 +1,6 @@
 ---
 created_at: 2011-08-28
-excerpt: Inline tags are a lot cooler than those devoid if context, so says the quick brown fox. 
+excerpt: Inline tags are a lot cooler than those devoid of context, so says the quick brown fox. 
 kind: article
 publish: true
 tags: [quick, brown, fox]

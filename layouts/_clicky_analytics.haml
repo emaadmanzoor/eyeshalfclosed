@@ -3,7 +3,10 @@ is_hidden: true
 ---
 -# Embeds clicky analyitics into the site
 - site_id = @config[:clicky_analytics][:site_id]
-- if site_id
+- if site_id 
+  %a(title="Clicky" href="http://getclicky.com/66503113" style="border-bottom: none;")
+    %img(alt="Clicky" src="//static.getclicky.com/media/links/badge.gif" border="0")
+  
   :javascript
     var clicky_site_ids = clicky_site_ids || [];
     clicky_site_ids.push(#{site_id});
@@ -14,4 +17,9 @@ is_hidden: true
       s.src = 'http://static.getclicky.com/js';
       ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
     })();
+  
+  %noscript
+    %p
+      %img(alt="Clicky" width="1" height="1" src="//in.getclicky.com/66503113ns.gif")
+
       
