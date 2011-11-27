@@ -6,6 +6,9 @@ Bundler.require
 require 'rack/contrib/try_static'
 require 'rack/contrib/response_headers'
 
+use Rack::ETag
+use Rack::Deflater
+
 use Rack::Cache,
   :verbose     => true,
   :metastore   => 'memcached://localhost:11211/',
