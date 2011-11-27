@@ -3,6 +3,9 @@
 require 'bundler'
 Bundler.require
 
+require 'rack/contrib/try_static'
+require 'rack/contrib/response_headers'
+
 use Rack::Cache,
   :verbose     => true,
   :metastore   => 'memcached://localhost:11211/',
