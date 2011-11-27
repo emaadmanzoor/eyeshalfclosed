@@ -1,7 +1,9 @@
 source :gemcutter
 
 gem 'thin'
+gem 'memcached'
 gem 'rack'
+gem 'rack-cache', :require => 'rack/cache'
 gem 'rack-rewrite', :require => 'rack-rewrite'
 gem 'rack-contrib', :require => 'rack/contrib'
 gem 'mime-types', :require => 'mime/types'
