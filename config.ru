@@ -3,6 +3,11 @@
 require 'bundler'
 Bundler.require
 
+use Rack::Cache,
+  :verbose     => true,
+  :metastore   => 'memcached://localhost:11211/',
+  :entitystore => 'file:/var/cache/rack'
+
 use Rack::ResponseHeaders do |headers|
   headers['Cache-Control'] = 'public, max-age=86400'
 end
