@@ -1,7 +1,6 @@
 source :gemcutter
 
 gem 'thin'
-gem 'memcached'
 gem 'dalli'
 gem 'rack'
 gem 'rack-cache', :require => 'rack/cache'

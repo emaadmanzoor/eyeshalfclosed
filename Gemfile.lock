@@ -17,7 +17,6 @@ GEM
     dalli (1.1.3)
     eventmachine (0.12.10)
     haml (3.1.3)
-    memcached (1.3.5)
     mime-types (1.17.2)
     multi_json (1.0.3)
     nanoc (3.2.3)
@@ -50,7 +49,6 @@ DEPENDENCIES
   cri
   dalli
   haml
-  memcached
   mime-types
   nanoc
   nanoc-fuel (= 0.0.7)!
