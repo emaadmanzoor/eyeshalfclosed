@@ -1,7 +1,7 @@
 include Nanoc3::Helpers::Rendering
 include Nanoc3::Helpers::Blogging
 include Nanoc3::Helpers::XMLSitemap
-include NanocFuel::Helpers::Facebook
+# include NanocFuel::Helpers::Facebook
 require 'builder'
 require 'fileutils'
 require 'time'

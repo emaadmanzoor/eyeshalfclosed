@@ -1,4 +1,4 @@
-source :gemcutter
+source "http://production.cf.rubygems.org/"
 
 gem 'thin'
 gem 'dalli'
@@ -16,9 +16,9 @@ group :development do
   gem 'nokogiri'
   gem 'coderay'
   gem 'nanoc-fuel', '=0.0.7', :path => "./gems/"
-  gem 'pandoc-ruby'
   gem 'cri'
   gem 'rdiscount'
   gem 'builder'
   gem 'activesupport'
+  gem 'rainpress'
 end
