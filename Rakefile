@@ -49,7 +49,7 @@ TEMPLATE
   end
 end
 
-BASE_URL = 'http://www.eyeshalfclosed.com/'
+BASE_URL = 'http://www.eyeshalfclosed.com/blog/'
 
 ##
 # Heroku-based Deployment
