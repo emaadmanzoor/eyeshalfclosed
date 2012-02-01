@@ -11,8 +11,8 @@ use Rack::Deflater
 
 use Rack::Cache,
   :verbose     => true,
-  :metastore   => 'memcached://localhost:11211/',
-  :entitystore => 'file:/var/cache/rack'
+  :metastore   => "memcached://#{ENV['MEMCACHE_SERVERS']}/meta",
+  :entitystore => "memcached://#{ENV['MEMCACHE_SERVERS']}/body"
 
 use Rack::ResponseHeaders do |headers|
   headers['Cache-Control'] = 'public, max-age=86400'
