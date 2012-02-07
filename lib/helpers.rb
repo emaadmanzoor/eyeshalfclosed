@@ -5,6 +5,7 @@ include Nanoc3::Helpers::XMLSitemap
 require 'builder'
 require 'fileutils'
 require 'time'
+require 'active_support/inflector'
 
 # Hyphens are converted to sub-directories in the output folder.
 #

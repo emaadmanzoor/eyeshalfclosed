@@ -1,16 +1,21 @@
 ---
 created_at: 2012-01-14
-excerpt: Disassembling the switch to a static blog; part one.
+excerpt: Disassembling the switch to a static blog.
 kind: article
 publish: true
-tags: [static blog, Disassembling]
+tags: [static blog, disassembling]
 title: "Compiled Are I"
 ---
 
-Introduction
-------------
+> While I’m not specifically trained as an author of prose,
+> I *am* trained as an author of code. What would happen if
+> I approached blogging from a software development perspective?
+> What would that look like?
+> <cite>Tom Preston-Werner</cite>
 
-Example of a [reference][0]
+
+It's been a while since [blogging like a hacker][0] did its rounds
+
 
 [0]: tom.preston-werner.com/2008/11/17/blogging-like-a-hacker.html
 

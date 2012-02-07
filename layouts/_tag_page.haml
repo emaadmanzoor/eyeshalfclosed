@@ -1,7 +1,7 @@
 ---
 ---
 %h1{:class => ['page_title']}
-  = "On #{tag.capitalize}"
+  = "On #{tag.titleize}"
 .clear
 .tag-page
   - items_with_tag(tag).each do |item|

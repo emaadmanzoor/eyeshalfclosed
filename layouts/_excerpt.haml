@@ -5,7 +5,7 @@
     excerpt = item[:excerpt]
     if item[:tags]
       item[:tags].each do |tag|
-        excerpt = excerpt.gsub(/#{tag}/, "<a href='/tags/#{tag}/' class='tag'>#{tag}</a>")
+        excerpt = excerpt.gsub(/#{tag}/i, "<a href='/tags/#{tag}/' class='tag'>#{'\0'}</a>")
       end
     end
     return excerpt

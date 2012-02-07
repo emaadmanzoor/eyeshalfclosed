@@ -12,7 +12,7 @@
     end
   end
   def link_unless_current(s)
-    "<li><a href='/#{s}/'>#{s}</a></li>" if @item.identifier != "/#{s}/" 
+    "<li><a href='/#{s}/'>#{s}</a></li><li>&middot;</li>" if @item.identifier != "/#{s}/" 
   end
   def logo
     if is_front_page?
@@ -53,11 +53,7 @@
                 &middot;
             - if is_front_page?
               != link_unless_current "taxonomy"
-              %li
-                &middot;
             != link_unless_current "archive"
-            %li
-              &middot;
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
             -#- if is_front_page?

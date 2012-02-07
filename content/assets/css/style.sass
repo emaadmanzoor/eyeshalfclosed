@@ -1,19 +1,17 @@
 //// Variables
-$base_color: #202020
-$heading_color: $base_color
-$normal_color: #404040
+$base_color: #333333
+$heading_color: #202020
+$normal_color: #222222
 $passive_color: #606060
 
 // ruby per wikipedia
 $logo_color: #993300 
 $logo_background_color: #ffffff
 
-$link_color: $heading_color
+$link_color: #333333
 $link_hover_color: #993300
-$link_border_color: #aaaaaa
+$link_border_color: #666666
 $link_bg: white
-
-$tag_color: #555
 
 $border_color: #bbbbbb
 
@@ -124,11 +122,11 @@ h1
   text-shadow: 0em -0.01em 0.05em #aaa
 
 h2, h3
-  color: $heading_color
   margin: 1.5em 0 1em
 
 h2
   font-size: 1.3em
+  font-weight: bold
 
 h3
   font-size: 1.1em
@@ -144,10 +142,24 @@ ul
 ol
   list-style-type: decimal
 
+
 /* pre
   background-color: #f8f8f8
   border-left: 3px double $border_color
   padding: 0.5em */
+
+blockquote:before, blockquote:after
+  content: ""
+
+blockquote
+  background: url("/assets/images/blockquote.png") no-repeat scroll 0 1em transparent
+  quotes: "" ""
+  padding: 2em 2.5em 0
+
+cite
+  display: block
+  text-align: right
+  padding: 1em 0
 
 #disqus_thread
   overflow: hidden
@@ -189,7 +201,7 @@ ol
     margin-bottom: 0 !important
     a
       border: none
-      color: #555 
+      color: #333333 
       font-size: 1.3em
       font-variant: small-caps
       &:hover
@@ -223,7 +235,7 @@ ol
   margin: 0 0 0 0.5em
   input
     background: url("/assets/images/searchicon.png") no-repeat scroll left center white
-    border: 0.05em dashed #aaa
+    border: 0.05em dashed #777777
     font-size: 0.8em
     font-variant: small-caps
     padding: 0.3em 2em
@@ -246,7 +258,7 @@ ol
       line-height: 4em
 
 #footer
-  border-top: 0.05em dotted #cccccc
+  border-top: 0.05em dotted #999999
   font-size: 0.8em
   margin: 2.5em auto 0
   padding: 1em
@@ -267,7 +279,10 @@ ol
 .article, .excerpt, .featured
   margin-bottom: 3.5em auto 2.5em auto
   .body
+    font-size: 1.1em
     padding: 0 1em
+    p
+      line-height: 1.6em
 
 .article, .featured
   text-align: left
@@ -289,6 +304,7 @@ ol
   h2
     margin: 0
     font-size: 2.5em
+    font-weight: normal
   p
     margin: 0.4em auto
     width: 80%
@@ -323,11 +339,6 @@ ol
 
 .page
   text-align: left
-
-a.tag
-  color: $tag_color !important
-  &:hover
-    color: $link_hover_color !important
 
 .tags
   text-transform: lowercase

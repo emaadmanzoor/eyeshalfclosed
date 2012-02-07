@@ -9,6 +9,7 @@ gem 'rack-contrib', :require => 'rack/contrib'
 gem 'mime-types', :require => 'mime/types'
 
 group :development do
+  gem 'activesupport'
   gem 'nanoc'
   gem 'adsf'
   gem 'haml'
