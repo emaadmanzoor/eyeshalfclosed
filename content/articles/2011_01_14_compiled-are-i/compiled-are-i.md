@@ -1,9 +1,9 @@
 ---
 created_at: 2012-01-14
-excerpt: Disassembling the switch to a static blog.
+excerpt: On the switch to nanoc.
 kind: article
 publish: true
-tags: [static blog, disassembling]
+tags: [nanoc]
 title: "Compiled Are I"
 ---
 
@@ -13,27 +13,24 @@ title: "Compiled Are I"
 > What would that look like?
 > <cite>Tom Preston-Werner</cite>
 
-I find myself alone, the pixels from [Blogging Like A Hacker][0]
-reflecting off my eyes. I tread empty battlefields of the
-blogosphere, consuming tales of mutiny against those machines
-that once served our need to express. I read of freedom and peace
-in minimalism and simplicity, and feel the weight of a time long
-past since some first seeked the right tools to build their prose.
+I feel alone, the pixels from [Blogging Like A Hacker][0]
+speaking of freedom and peace in minimalism and simplicity, and
+feel the weight of a time long past since some first seeked the
+right tools to build their prose.
 
-Though too late, I have suffered the same itch as those who have
-passed me by, spent time in scrutinizing their remedies, and
-come to adopt a cure that has left me content. Hence, I shall
-leave my share of fresh debris on this old field, in the hope
-that it serves some whom none could before.
+Though a bit too late, I have suffered the same itch, spent
+time scrutinizing their remedies, and come to adopt a cure that
+leaves me content. Hence, I leave my share of fresh debris on
+this old field, in the hope that it serves some whom none
+could before.
 
 [0]: http://tom.preston-werner.com/2008/11/17/blogging-like-a-hacker.html
 
-Picking A Cure
---------------
+The Choice
+----------
 
-[Many][1] cures existed before Tom Presten-Werner expressed
-the problem so succintly. Most were short-lived, personal hacks.
-Most lacked documentation effort, of which the popular ones made
+[Many][1] cures exist. Most were short-lived, personal hacks
+lacking documentation effort, of which the popular ones made
 up for with their expressive community. I was looking for the
 perfect blend of malleability, strength and a good instruction manual.
 
@@ -50,7 +47,7 @@ this [beautiful guide][2].
 
 2. [**Jekyll**](http://jekyllrb.com/): Possibly the most popular of the lot, with a
 really neat [framework][3] to get started with, and solid backing
-from the enterprise (Github Pages uses this) and community. Perfect
+from the big players (Github Pages uses this) and community. Perfect
 for the blogger focused on blogging, with no desires to spend time
 tweaking their platform to perform silly stunts.
 
@@ -74,27 +71,42 @@ counted as my reasons against the options above:
 
     iii. *Powerful*: This could be a corollary of the two
     above; with the depth of documentation at hand, anyone
-    with basic Ruby skills can extend the engine to do the
-    silly stunts they wish. And people do that pretty often,
-    eventually ending up as a how-to guide on the forum for
-    the rest of the community to adopt and extend.
+    with basic Ruby skills can extend the engine to perform
+    breathtaking acrobatic manoeuvers.
 
-Finding Some Boilerplate
-------------------------
-
-Finding goes here
-
-Building The Blog
------------------
-
-Code stuff.
-
-Picking A Web Host & DNS
-------------------------
-
-Host selection goes here.
-
-Blast Off!
+The Switch
 ----------
 
-Launch!
+The power of customizability carries the burden of the
+time it consumes. Ideally, you'd tweak until it's just
+perfect, when really, it never is. The switch was meant
+to be painless, but the more I realised was possible, the
+longer the silence on my [old blog][4], as I toiled
+behind my shiny new nanoc3 site hosted on Heroku.
+
+This post was intended to be a practical, comprehensive
+guide to the switch from Wordpress, but the
+time lapsed between that process and now leaves me
+with just a bunch of references that guided me through.
+
+[4]: http://halfclosed.wordpress.com/
+
+References
+----------
+
+1. [**nanoc3_blog**](https://github.com/mgutz/nanoc3_blog): A
+   well done starter kit for nanoc3, with minimalistic styling
+   and a bunch of useful blog features like archives, tags and
+   pages.
+
+2. [**nanoc_fuel**](https://github.com/kamui/nanoc-fuel): The
+   one stop solution to adding Facebook likes and comments to
+   your nanoc3 blog.
+
+3. [**Octopress**][3]: While a Jekyll framework, the features
+   curated by this project are easily embeddable into any nanoc3
+   blog. 
+
+The switch is quickest if you know exactly what you want, and
+can dabble in Ruby without fear. While you're at it, the place
+to be is the [nanoc group](http://groups.google.com/group/nanoc).

@@ -1,8 +1,8 @@
 ---
 created_at: 2011-08-28
-excerpt: Inline tags are a lot cooler than those devoid of context, so says the quick brown fox. 
+excerpt: So says the quick brown fox. 
 kind: article
-publish: false
+publish: false 
 tags: [quick, brown, fox]
 title: "The Quick Brown Fox"
 ---
