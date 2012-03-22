@@ -244,6 +244,12 @@ is created by default by the Beanstalkd server, it would do us good to ignore it
   beanstalk.watch(QUEUE_TO_WATCH)
   beanstalk.ignore(QUEUE_TO_IGNORE)
 </code>
+The first triplet of lines is something you'll need to be aware of and adapt to your
+scenario. *N* is the total number of darts to throw, and directly affects the accuracy
+of your estimate and the computing power required. *K* needs to be set equal to the
+number of worker nodes you expect to see active. Leaving these unchanged won't break
+any functionality, but it will leave you taking long coffee breaks until you see any
+meaningful results.
 
 This tells Beanstalkd that we want to *use*, or push to *QUEUE_TO_USE*, to *watch*, or
 consume from *QUEUE_TO_WATCH* and *ignore* the *default* queue. It also sets up our
