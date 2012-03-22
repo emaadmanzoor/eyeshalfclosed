@@ -7,7 +7,7 @@ tags: [beanstalkd, distributed computing]
 title: "Throwing Darts"
 ---
 
-This weekend was an illuminating. We'd been assigned the task
+This weekend was illuminating. We'd been assigned the task
 of building a compute cluster, with the freedom to intelligently
 choose every component of the distributed system. This post documents
 the how's and why's of building the system from the ground up with
@@ -39,7 +39,7 @@ Purpose And Background
 
 **The Purpose**
 
-The aim was construct something reasonably fault tolerant that could
+The aim was to construct something reasonably fault tolerant that could
 execute simple parallel algorithms across a bunch of nodes, with a
 visible speed-up. Other motivations were to put together a system
 that could serve as a useful pedagogical tool for a parallel computing
@@ -97,8 +97,8 @@ needs.
 
 *Beanstalkd* fit the bill perfectly. It's the lightest work-queue solution
 we could find that supported some form of queue persistence and worker failure
-recovery. To top that off, getting a working Beanstalkd prototype running took
-all of ten minutes!
+recovery. To top that off, getting a working Beanstalkd setup took all of
+ten minutes!
 
 *[Go back to the contents index](#contents)*
 
