@@ -251,9 +251,8 @@ number of worker nodes you expect to see active. Leaving these unchanged won't b
 any functionality, but it will leave you taking long coffee breaks until you see any
 meaningful results.
 
-This tells Beanstalkd that we want to *use*, or push to *QUEUE_TO_USE*, to *watch*, or
-consume from *QUEUE_TO_WATCH* and *ignore* the *default* queue. It also sets up our
-job variables as described in the comments.
+It also tells the Beanstalkd server which queues to *watch*, or consume from, *use*,
+or push to, and *ignore*, which takes on its literal meaning this time.
 
 <code class="python">
   use_queue_was_full = False
