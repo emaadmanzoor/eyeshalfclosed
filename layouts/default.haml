@@ -74,7 +74,7 @@
         = render('_article', :item => @item, :content => content)
         = render('_other_articles_nav', :reference_item => @item)
         .clear
-        - if disqus_shortname && !is_front_page?
+        - if disqus_shortname && !is_front_page? && !(@item[:disablecomments] == true)
           = render('_disqus', :item => @item)
         //- if @item[:issue] && @config[:use_github_comments]
         //  = render('_github_comments', :issue => @issue)
