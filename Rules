@@ -12,7 +12,7 @@ compile '/assets/css/*/' do
   filter :rainpress
 end
 
-compile '/assets/js/*/' do
+compile '/assets/js/*' do
 end
 
 compile '*' do
@@ -43,6 +43,10 @@ end
 
 route '/assets/css/*/' do
   item.identifier.chop + '.css'
+end
+
+route '/assets/js/*/' do
+  item.identifier.chop + '.js'
 end
 
 route '/articles/*/*' do

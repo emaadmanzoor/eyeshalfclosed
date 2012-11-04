@@ -22,7 +22,8 @@
     %link(href="#{@config[:base_url]}/assets/css/reset.css" rel="stylesheet" type="text/css")
     %link(href="#{@config[:base_url]}/assets/css/sunburst.css" media="screen" rel="stylesheet" type="text/css")
     %link(href="#{@config[:base_url]}/assets/css/style.css" media="screen" rel="stylesheet" type="text/css")
-    %script(src="#{@config[:base_url]}/assets/js/tapir-min.js" type="text/javascript")
+    %script(src="#{@config[:base_url]}/assets/js/jquery.js" type="text/javascript")
+    %script(src="#{@config[:base_url]}/assets/js/jquery-tapir-min.js" type="text/javascript")
 
   %body
     -# needed since some content render <pre> blocks
@@ -38,7 +39,7 @@
                 &middot;
               %li
                 #search
-                  %form{:method => 'post'}
+                  %form{:method => 'get', :action => 'search/'}
                     %input{:type => 'search', :name => 'query', :placeholder => 'search posts'}
               %li
                 &middot;
