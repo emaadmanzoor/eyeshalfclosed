@@ -71,8 +71,9 @@ task :ghdeploy do
   puts %x[git commit -a -m "temporary commit for deployment"]
   puts 'Deploying to Github pages..'
   puts %x[git push]
-  puts %x[cd ..]
-  puts %x[git checkout master]
+  Dir.chdir ".."
+  puts %x[pwd]
+  puts %x[git checkout master .]
 end
 
 ##
