@@ -62,7 +62,7 @@ task :deploy do
   revert!
 end
 
-task :ghdeploy do
+task :gh do
   change_base_url_to(BASE_URL)
   puts %x[nanoc co]
   Dir.chdir "output"
