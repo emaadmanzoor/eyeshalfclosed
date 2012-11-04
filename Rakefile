@@ -50,9 +50,8 @@ end
 BASE_URL = 'http://www.eyeshalfclosed.com/blog'
 
 ##
-# Heroku-based Deployment
+# Github Pages Deployment
 #
-# Requires a Heroku Application (a heroku remote) that runs on Celadon Cedar
 #
 desc 'Deploy the website to Heroku using Git.'
 task :deploy do
@@ -73,7 +72,7 @@ def prepare!
   end
 
   puts "Creating and moving in to \"deployment\" branch.."
-  puts %x[git checkout -b deployment]
+  puts %x[git checkout gh-pages]
 
   puts "Removing \"output\" directory from .gitignore.."
   gitignore = File.read(".gitignore")
@@ -101,7 +100,7 @@ def deploy!
   puts %x[git add .]
   puts %x[git commit -a -m "temporary commit for deployment"]
   puts 'Deploying to Heroku..'
-  puts %x[git push heroku HEAD:master --force]
+  puts %x[git push origin HEAD:gh-pages --force]
 end
 
 ##
@@ -109,7 +108,6 @@ end
 #
 def revert!
   %x[git checkout master]
-  %x[git branch -D deployment]
 end
 
 ##
