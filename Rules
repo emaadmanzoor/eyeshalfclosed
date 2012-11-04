@@ -20,24 +20,25 @@ compile '*' do
   if !item.binary?
     if ext == 'erb'
       filter :erb
+      item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
+      layout 'default' unless item[:layout] == "none"
       filter :relativize_paths, :type => :xml
     elsif ext == 'haml' || ext.nil?
       filter :haml
+      item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
+      layout 'default' unless item[:layout] == "none"
       filter :relativize_paths, :type => :html
     elsif ext == 'md' || ext == 'markdown'
       filter :erb
       filter :ultraviolet
       filter :rdiscount
       filter :typogruby
+      item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
+      layout 'default' unless item[:layout] == "none"
       filter :relativize_paths, :type => :html
     else
       raise "Filter is not configured for #{item.identifier} in Rules file."
     end
-
-    # use layouts with .html extension or layout specified in meta
-    item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
-
-    layout 'default' unless item[:layout] == "none"
   end
 end
 
