@@ -72,7 +72,7 @@ def prepare!
   end
 
   puts "Creating and moving in to \"deployment\" branch.."
-  puts %x[git checkout gh-pages]
+  puts %x[git checkout -b deployment]
 
   puts "Removing \"output\" directory from .gitignore.."
   gitignore = File.read(".gitignore")
@@ -99,7 +99,7 @@ def deploy!
   puts "Adding and committing compiled output for deployment.."
   puts %x[git add .]
   puts %x[git commit -a -m "temporary commit for deployment"]
-  puts 'Deploying to Heroku..'
+  puts 'Deploying to Github pages..'
   puts %x[git push origin HEAD:gh-pages --force]
 end
 
