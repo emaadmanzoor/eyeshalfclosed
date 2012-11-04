@@ -1,31 +1,16 @@
-$heading_color: #202020
-$normal_color: #222222
 $passive_color: #606060
-
-$logo_color: #993300 
-$logo_background_color: #ffffff
-
-$link_color: #333333
 $link_hover_color: #993300
-$link_border_color: #666666
-$link_bg: white
-
-=serif
-  font-family: Palatino, "palatino linotype", Georgia, serif
-
-=monospace
-  font-family: Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace
 
 *
-  +serif
-  color: $normal_color
+  font-family: Palatino, "palatino linotype", Georgia, serif
+  color: #222
 
 body
   font-size: 100% 
   text-align: center
 
 a
-  border-bottom: dotted 0.1em $link_border_color
+  border-bottom: dotted 0.1em #666
   text-decoration: none
   &:link, &:visited
   &:hover
@@ -39,7 +24,7 @@ img
   margin-right: auto
 
 pre
-  +monospace
+  font-family: Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace
   display: block
   font-size: 0.8em
   line-height: 1.5em !important
@@ -47,7 +32,7 @@ pre
   white-space: pre
 
 pre span
-  +monospace
+  font-family: Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace
 
 blockquote, div, ol, p, pre, ul
   line-height: 1.5em
@@ -127,7 +112,7 @@ cite
 #header
   margin-bottom: 1em
   .logo
-    color: $logo_color
+    color: #993300 
     font-size: 4em
     letter-spacing: -0.06em
     line-height: 1.4em
