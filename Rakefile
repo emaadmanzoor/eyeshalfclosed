@@ -1,4 +1,5 @@
 require 'nanoc/tasks'
+require 'nanoc-git/tasks'
 require 'fileutils'
 
 namespace :create do

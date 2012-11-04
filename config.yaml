@@ -18,3 +18,9 @@ other_articles_max: 1
 include_disqus_js: false
 disqus_shortname: eyeshalfclosed
 ultraviolet_theme: sunburst
+deploy:
+    default:
+        dst_remote: origin
+        dst_branch: gh-pages
+        src_branch: master
+
