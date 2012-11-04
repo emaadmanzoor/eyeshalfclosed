@@ -9,7 +9,6 @@ end
 
 compile '/assets/css/*/' do
   filter :sass
-  filter :rainpress
 end
 
 compile '/assets/js/*' do

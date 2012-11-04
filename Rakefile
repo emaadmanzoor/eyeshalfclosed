@@ -62,6 +62,18 @@ task :deploy do
   revert!
 end
 
+task :ghdeploy do
+  change_base_url_to(BASE_URL)
+  puts %x[nanoc compile]
+  puts %x[cd output]
+  puts %x[git add .]
+  puts %x[git commit -a -m "temporary commit for deployment"]
+  puts 'Deploying to Github pages..'
+  puts %x[git push]
+  puts %x[cd ..]
+  puts %x[git checkout master]
+end
+
 ##
 # Prepares the deployment environment
 #
