@@ -20,9 +20,6 @@ compile '*' do
   if !item.binary?
     if ext == 'erb'
       filter :erb
-      item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
-      layout 'default' unless item[:layout] == "none"
-      filter :relativize_paths, :type => :xml
     elsif ext == 'haml' || ext.nil?
       filter :haml
       item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
@@ -32,7 +29,7 @@ compile '*' do
       filter :erb
       filter :ultraviolet
       filter :rdiscount
-      filter :typogruby
+#      filter :typogruby
       item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
       layout 'default' unless item[:layout] == "none"
       filter :relativize_paths, :type => :html
@@ -60,10 +57,6 @@ route '/articles/*/*' do
     directory = item.raw_filename.split('/')[-2].split('_').join('/')
     '/' + directory + '/' + asset_name
   end
-end
-
-route '/feed/' do
-    '/atom.xml'
 end
 
 route '*' do
