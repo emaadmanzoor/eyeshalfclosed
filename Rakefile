@@ -48,7 +48,7 @@ TEMPLATE
   end
 end
 
-BASE_URL = 'http://www.eyeshalfclosed.com/blog'
+BASE_URL = 'http://eyeshalfclosed.com/blog'
 
 ##
 # Github Pages Deployment
