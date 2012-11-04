@@ -3,8 +3,6 @@
   <head>
     <title>eyeshalfclosed</title>
     <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-    <meta content='fox, cat, hat' name='keywords'>
-    <meta content='' name='description'>
     <meta content='width=320' name='viewport'>
     <link href='/blog/assets/css/reset.css' rel='stylesheet' type='text/css'>
     <link href='style.css' media='screen' rel='stylesheet' type='text/css'>
@@ -17,12 +15,24 @@
           <ul>
             <li><a href='/blog/'>blog</a></li><li>&middot;</li>
             <li><a href='https:/github.com/emaadmanzoor/'>code</a></li><li>&middot;</li>
-            <li><a href='mailto:emaadmanzoor@eyeshalfclosed.com'>talk</a></li>
+            <li><a href='mailto:emaadmanzoor@gmail.com'>talk</a></li>
           </ul>
         </div>
         <p>I like good food.</p>
       </div>
     </div>
-    = render('_ganalytics')
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-36072775-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
   </body>
 </html>
