@@ -3,7 +3,6 @@ created_at: 2011-08-28
 excerpt: Yet another article about a cat in a hat 
 kind: article
 publish: false 
-tags: [cat, hat]
 title: "Daisy Dog"
 ---
 

@@ -3,7 +3,6 @@ created_at: 2011-08-28
 excerpt: So says the quick brown fox. 
 kind: article
 publish: false 
-tags: [quick, brown, fox]
 title: "The Quick Brown Fox"
 ---
 <p class="has-pullquote" data-pullquote="Testing the goodness of HTML5 pullquotes">

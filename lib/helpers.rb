@@ -1,6 +1,6 @@
-include Nanoc3::Helpers::Rendering
-include Nanoc3::Helpers::Blogging
-include Nanoc3::Helpers::XMLSitemap
+include Nanoc::Helpers::Rendering
+include Nanoc::Helpers::Blogging
+include Nanoc::Helpers::XMLSitemap
 # include NanocFuel::Helpers::Facebook
 require 'builder'
 require 'fileutils'
@@ -52,42 +52,6 @@ def get_article_path(item)
     '/' + date.strftime('%Y/%m/%d') + '/' + slug + '/'  
 end
 
-# Creates in-memory tag pages from partial: layouts/_tag_page.haml
-def create_tag_pages
-  tag_set(items).each do |tag|
-    items << Nanoc3::Item.new(
-      "= render('_tag_page', :tag => '#{tag}')",           # use locals to pass data
-      { :title => "Category: #{tag}", :is_hidden => true}, # do not include in sitemap.xml
-      "/tags/#{tag}/",                                     # identifier
-      :binary => false
-    )
-  end
-end
-
-
-def add_update_item_attributes
-  changes = MGutz::FileChanges.new
-
-  items.each do |item|
-    # do not include assets or xml files in sitemap
-    if item[:content_filename]
-      ext = File.extname(route_path(item))
-      item[:is_hidden] = true if item[:content_filename] =~ /assets\// || ext == '.xml'
-    end
-
-    if item[:kind] == "article"
-      # filename might contain the created_at date
-      item[:created_at] ||= derive_created_at(item)
-      # sometimes nanoc3 stores created_at as Date instead of String causing a bunch of issues
-      item[:created_at] = item[:created_at].to_s if item[:created_at].is_a?(Date)
-
-      # sets updated_at based on content change date not file time
-      change = changes.status(item[:content_filename], item[:created_at], item.raw_content)
-      item[:updated_at] = change[:updated_at].to_s
-    end
-  end
-end
-
 
 # Copy static assets outside of content instead of having nanoc3 process them.
 def copy_static
@@ -95,7 +59,7 @@ def copy_static
 end
 
 def partial(identifier_or_item)
-  item = !item.is_a?(Nanoc3::Item) ? identifier_or_item : item_by_identifier(identifier_or_item)
+  item = !item.is_a?(Nanoc::Item) ? identifier_or_item : item_by_identifier(identifier_or_item)
   item.compiled_content(:snapshot => :pre) 
 end
 
@@ -197,4 +161,21 @@ def derive_created_at(item)
   rescue
   end
   date
+end
+
+def add_update_item_attributes
+  items.each do |item|
+    # do not include assets or xml files in sitemap
+    if item[:content_filename]
+      ext = File.extname(route_path(item))
+      item[:is_hidden] = true if item[:content_filename] =~ /assets\// || ext == '.xml'
+    end
+
+    if item[:kind] == "article"
+      # filename might contain the created_at date
+      item[:created_at] ||= derive_created_at(item)
+      # sometimes nanoc3 stores created_at as Date instead of String causing a bunch of issues
+      item[:created_at] = item[:created_at].to_s if item[:created_at].is_a?(Date)
+    end
+  end
 end

@@ -3,7 +3,6 @@ created_at: 2012-01-14
 excerpt: On the switch to nanoc.
 kind: article
 publish: true
-tags: [nanoc]
 title: "Compiled Are I"
 ---
 

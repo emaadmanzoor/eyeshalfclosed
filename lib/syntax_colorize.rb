@@ -1,9 +1,9 @@
-module Nanoc3::Helpers
+module Nanoc::Helpers
 
   module SyntaxColorize
 
-    require 'nanoc3/helpers/capturing'
-    include Nanoc3::Helpers::Capturing
+    require 'nanoc/helpers/capturing'
+    include Nanoc::Helpers::Capturing
 
     def syntax_colorize(lang, type=:ultraviolet, &block)
       # Capture block
@@ -47,7 +47,7 @@ module Nanoc3::Helpers
         filtered_data.sub!(/\s*(<\/pre>)\s*$/) { |m| "</code>#{m}" }
       when :coderay
         # Find filter
-        klass = Nanoc3::Filter.named(:coderay)
+        klass = Nanoc::Filter.named(:coderay)
         filter = klass.new(@item_rep.assigns)
         
         # Filter captured data

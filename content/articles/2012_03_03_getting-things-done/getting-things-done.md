@@ -3,7 +3,6 @@ created_at: 2012-03-03
 excerpt: On getting things done.
 kind: article
 publish: true
-tags: [getting things done]
 title: "The Finish Line"
 ---
 

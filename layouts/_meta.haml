@@ -2,16 +2,13 @@
 ---
 - if item[:kind] == 'article'
   .meta
-    %ul.tags
+    %ul
       %li
+        On
         = pretty_time(item[:created_at])
-        -#%li
-          &middot;
-        -#%li
-          %a(href="#{route_path(item)}#disqus_thread")
-      - if item[:tags]
-        %li &middot;
-        - item[:tags].sort.each do |tag|
-          %li
-            %a(href="/tags/#{tag}/" class='tag')
-              = tag
+      %li
+        By
+        %a(href="http://github.com/emaadmanzoor")
+          Emaad Ahmed Manzoor
+      -#%li
+        %a(href="#{route_path(item)}#disqus_thread")

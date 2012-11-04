@@ -1,8 +1,0 @@
----
----
-%h1{:class => ['page_title']}
-  = "On #{tag.titleize}"
-.clear
-.tag-page
-  - items_with_tag(tag).each do |item|
-    = render('_excerpt', :item => item) 

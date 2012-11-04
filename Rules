@@ -3,15 +3,16 @@
 preprocess do
   # authors may unpublish items by setting meta attribute publish: false
   items.delete_if { |item| item[:publish] == false }
-
   copy_static
-  create_tag_pages
   add_update_item_attributes
 end
 
 compile '/assets/css/*/' do
   filter :sass
   filter :rainpress
+end
+
+compile '/assets/js/*/' do
 end
 
 compile '*' do
@@ -27,6 +28,7 @@ compile '*' do
       filter :erb
       filter :ultraviolet
       filter :rdiscount
+      filter :typogruby
     else
       raise "Filter is not configured for #{item.identifier} in Rules file."
     end

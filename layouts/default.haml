@@ -1,16 +1,6 @@
 ---
 ---
 :ruby
-  # may be set by partials
-  def keywords
-    if is_front_page?
-      tag_set.join(', ') 
-    else
-      tags = @item[:tags].nil? ? '' : @item[:tags].join(', ') 
-      keywords = @item[:keywords] || ''
-      [keywords, tags].join(', ')
-    end
-  end
   def link_unless_current(s)
     "<li><a href='/#{s}/'>#{s}</a></li><li>&middot;</li>" if @item.identifier != "/#{s}/" 
   end
@@ -27,12 +17,12 @@
   %head
     %title= "#{@item[:title]}"
     %meta(content="text/html; charset=utf-8" http-equiv="Content-Type")
-    %meta(name="keywords" content="#{keywords}")
     %meta(name="description" content="#{@item[:excerpt]}")
     %meta(name="viewport" content="width=320")
     %link(href="#{@config[:base_url]}/assets/css/reset.css" rel="stylesheet" type="text/css")
     %link(href="#{@config[:base_url]}/assets/css/sunburst.css" media="screen" rel="stylesheet" type="text/css")
     %link(href="#{@config[:base_url]}/assets/css/style.css" media="screen" rel="stylesheet" type="text/css")
+    %script(src="#{@config[:base_url]}/assets/js/tapir-min.js" type="text/javascript")
 
   %body
     -# needed since some content render <pre> blocks
@@ -42,33 +32,29 @@
         #nav
           %ul
             %li
-              %a(href="http://www.eyeshalfclosed.com/") (:]
-            %li
-              &middot;
+              %a(href="http://www.eyeshalfclosed.com/") home 
+            - if is_front_page?
+              %li
+                &middot;
+              %li
+                #search
+                  %form{:method => 'post'}
+                    %input{:type => 'search', :name => 'query', :placeholder => 'search posts'}
+              %li
+                &middot;
             - if not is_front_page?
+              %li
+                &middot;
               %li
                 %a(href="/")
                   index
               %li
                 &middot;
-            - if is_front_page?
-              != link_unless_current "taxonomy"
             %li
               %a(href='http://feeds.feedburner.com/eyeshalfclosed') feed
-            -#- if is_front_page?
-              -#%li
-                &middot;
-              -#%li
-                #search
-                  %form{:method => 'post'}
-                    %input{:type => 'text', :name => 'query'}
         - if is_front_page?
           .logo
             = logo
-        -#- else
-          .article_logo
-            = logo
-
 
       - if @item[:kind] == 'article'
         = render('_article', :item => @item, :content => content)
@@ -76,27 +62,23 @@
         .clear
         - if disqus_shortname && !is_front_page? && !(@item[:disablecomments] == true)
           = render('_disqus', :item => @item)
-        //- if @item[:issue] && @config[:use_github_comments]
-        //  = render('_github_comments', :issue => @issue)
-        //- if @config[:use_facebook_comments] && !is_front_page?
-        //  = fb_init(@config[:facebook_appid])
-        //  = fb_comments("#{@config[:base_url]+route_path(item)}", "10", "650") 
       - elsif @item[:kind] == 'page'
         .page
           = content
       - else
         = content
      
-      #footer
-        Built with   
+      #page-footer
+        Crafted with   
         %a(href="http://nanoc.stoneship.org/")
           nanoc
-        and hosted by 
-        %a(href="http://www.heroku.com")
-          Heroku
+        &nbsp;
+        &middot;
+        &nbsp;
+        Source on 
+        %a(href="http://github.com/emaadmanzoor/eyeshalfclosed/")
+          Github
         %br
-        Realtime analytics by 
-        = render('_clicky_analytics')     
     
     -# disqus: inserts number of commments     
     - if @config[:include_disqus_js] == true

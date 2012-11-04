@@ -1,5 +1,4 @@
-
-require 'nanoc3/tasks'
+require 'nanoc/tasks'
 require 'fileutils'
 
 namespace :create do
@@ -29,7 +28,6 @@ created_at: #{@ymd}
 excerpt: 
 kind: article
 publish: true
-tags: [misc]
 title: "#{title.titleize}"
 ---
 

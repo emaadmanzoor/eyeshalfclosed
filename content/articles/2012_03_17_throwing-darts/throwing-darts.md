@@ -3,7 +3,6 @@ created_at: 2012-03-17
 excerpt: Estimating π on a beanstalkd cluster.
 kind: article
 publish: true
-tags: [beanstalkd, distributed computing]
 title: "Throwing Darts"
 ---
 
@@ -37,7 +36,7 @@ Contents
 Purpose And Background
 ----------------------
 
-**The Purpose**
+### The Purpose
 
 The aim was to construct something reasonably fault tolerant that could
 execute simple parallel algorithms across a bunch of nodes, with a

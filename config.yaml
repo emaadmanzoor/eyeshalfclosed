@@ -17,7 +17,4 @@ excerpt_count: 6
 other_articles_max: 1
 include_disqus_js: false
 disqus_shortname: eyeshalfclosed
-use_facebook_comments: false
-use_github_comments: false
-facebook_appid: 265263273491887647
 ultraviolet_theme: sunburst

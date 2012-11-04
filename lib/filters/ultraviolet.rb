@@ -1,4 +1,4 @@
-class UltraVioletFilter < Nanoc3::Filter
+class UltraVioletFilter < Nanoc::Filter
     identifier :ultraviolet
 
     def run(content, params={})
@@ -8,7 +8,7 @@ class UltraVioletFilter < Nanoc3::Filter
         new_content=content.gsub(code_rule) do |full|
             @lang, @filename, @code = $2, $4, $5
             if @lang =~ /^(zsh|bash|sh|csh|shell)$/
-                @lang='shell-unix-generic'
+                @lang='shell'
             end
             @codeprefix=''
             @codesuffix=''
