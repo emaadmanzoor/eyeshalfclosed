@@ -64,7 +64,7 @@ end
 
 task :ghdeploy do
   change_base_url_to(BASE_URL)
-  puts %x[nanoc compile]
+  puts %x[nanoc co]
   Dir.chdir "output"
   puts %x[pwd]
   puts %x[git add .]
