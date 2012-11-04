@@ -65,7 +65,8 @@ end
 task :ghdeploy do
   change_base_url_to(BASE_URL)
   puts %x[nanoc compile]
-  puts %x[cd output]
+  Dir.chdir "output"
+  puts %x[pwd]
   puts %x[git add .]
   puts %x[git commit -a -m "temporary commit for deployment"]
   puts 'Deploying to Github pages..'
