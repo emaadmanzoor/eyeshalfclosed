@@ -6,6 +6,15 @@ publish: true
 title: "Throwing Darts"
 ---
 
+**Update: November 6, 2012:** We further organized the content of this post and
+conducted a 3-hour [tutorial](http://in.pycon.org/2012/funnel/pyconindia2012/55-simple-linux-cluster-with-python-and-beanstalkd)
+at PyCon India 2012. The source code and tutorial slides are available on our
+[Github repository](https://github.com/emaadmanzoor/beanstalkd-pycon2012-tutorial/).
+
+<div class="presentation">
+    <script async class="speakerdeck-embed" data-id="5078db60cd52500002042a24" data-ratio="1.3333333333333333" src="//speakerdeck.com/assets/embed.js"></script>
+</div>
+
 This weekend was illuminating. We'd been assigned the task
 of building a compute cluster, with the freedom to intelligently
 choose every component of the distributed system. This post documents
