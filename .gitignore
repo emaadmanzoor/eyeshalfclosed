@@ -3,5 +3,5 @@
 .sass-cache
 *.log
 *.swp
-output
+
 tmp

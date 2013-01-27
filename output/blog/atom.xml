@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://eyeshalfclosed.com/blog/</id>
+  <title>eyeshalfclosed</title>
+  <updated>2013-03-26T18:30:00Z</updated>
+  <link rel="alternate" href="http://eyeshalfclosed.com/blog/"/>
+  <link rel="self" href="http://feeds.feedburner.com/eyeshalfclosed"/>
+  <author>
+    <name>Emaad Ahmed Manzoor</name>
+    <uri>http://eyeshalfclosed.com</uri>
+  </author>
+  <entry>
+    <id>tag:eyeshalfclosed.com,2013-03-27:/blog/2013/03/27/infinite-loops/</id>
+    <title type="html">Infinite Loops</title>
+    <published>2013-03-26T18:30:00Z</published>
+    <updated>2013-03-26T18:30:00Z</updated>
+    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2013/03/27/infinite-loops/"/>
+    <content type="html">&lt;p&gt;I draw to the end of my first week of Coursera's &lt;a href="https://class.coursera.org/progfun-2012-001/"&gt;Scala course&lt;/a&gt;. I have
+taken it up as a solitary student with a vengeance, armed with a new year's
+boost in morale since abandoning it midway last year. Expecting to blaze through
+the first few weeks, I had planned to work through the course using both Scala
+and Clojure and then churn out code walkthroughs of the &lt;a href="https://github.com/nathanmarz/storm/"&gt;Storm&lt;/a&gt; stream processing
+platform (a Clojure project) and the &lt;a href="http://kafka.apache.org/"&gt;Kafka&lt;/a&gt; message queue (a Scala project).&lt;/p&gt;
+
+&lt;p&gt;It turns out there are some important differences in the way these two functional
+languages work that are not skin-deep. This post documents the differences I found
+and investigated while writing infinite-recursive methods in Scala and Clojure.&lt;/p&gt;
+
+&lt;h2&gt;The Background: Function Evaluation&lt;/h2&gt;
+
+&lt;p&gt;This week was about some basic concepts and theory on the substitution model of
+function execution. In a nutshell, there are two ways a called function can
+be reduced to a value in the substitution model:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt; &lt;strong&gt;Call-by-value:&lt;/strong&gt; The function's arguments are fully reduced before the
+  function is applied to them. This is the &lt;em&gt;default&lt;/em&gt; method of substitution
+  in both Clojure and Scala. An example series of reductions could be:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;pre class="sunburst"&gt;
+  sumOfSquares(&lt;span class="Constant"&gt;4&lt;/span&gt;, &lt;span class="Constant"&gt;3&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumOfSquares(&lt;span class="Constant"&gt;4&lt;/span&gt;, &lt;span class="Constant"&gt;5&lt;/span&gt;) &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Argument reduced to a value&lt;/span&gt;
+      &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; square(&lt;span class="Constant"&gt;4&lt;/span&gt;) &lt;span class="Keyword"&gt;+&lt;/span&gt; square(&lt;span class="Constant"&gt;5&lt;/span&gt;) &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Function applied&lt;/span&gt;
+        &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;16&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;25&lt;/span&gt;
+          &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;41&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt; &lt;strong&gt;Call-by-name:&lt;/strong&gt; Applies the function to unreduced arguments. The arguments
+  are evaluated in the body of the function &lt;em&gt;if needed&lt;/em&gt;. This gives us a
+  convenient way to short-circuit reduction of a parameter if it is unused in
+  the function body. An example series of reductions for this would be:&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;pre class="sunburst"&gt;
+  sumOfSquares(&lt;span class="Constant"&gt;4&lt;/span&gt;, &lt;span class="Constant"&gt;3&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; square(&lt;span class="Constant"&gt;4&lt;/span&gt;) &lt;span class="Keyword"&gt;+&lt;/span&gt; square(&lt;span class="Constant"&gt;3&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;) &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Function applied&lt;/span&gt;
+      &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; square(&lt;span class="Constant"&gt;4&lt;/span&gt;) &lt;span class="Keyword"&gt;+&lt;/span&gt; square(&lt;span class="Constant"&gt;5&lt;/span&gt;) &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Argument reduced&lt;/span&gt;
+        &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;16&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;25&lt;/span&gt;
+          &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;41&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;Note that I have omitted some of the reduction steps for brevity.&lt;/p&gt;
+
+&lt;h2&gt;The Task: Infinite Recursion&lt;/h2&gt;
+
+&lt;p&gt;An in-class exercise was to write a function for the boolean-and of two variables without
+using the built-in primitives. The crux of this task was to remember the short-circuits:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  true &lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt; Y &lt;span class="Keyword"&gt;==&lt;/span&gt; Y
+  false &lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt; Y &lt;span class="Keyword"&gt;==&lt;/span&gt; false
+&lt;/pre&gt;
+
+
+&lt;p&gt;In Scala, this can be quickly accomplished by:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Storage"&gt;def&lt;/span&gt; &lt;span class="Entity"&gt;and2&lt;/span&gt;(x: &lt;span class="Variable"&gt;Boolean&lt;/span&gt;, y: &lt;span class="Variable"&gt;Boolean&lt;/span&gt;) = if (&lt;span class="Variable"&gt;x&lt;/span&gt;) y else &lt;span class="Variable"&gt;false&lt;/span&gt; 
+&lt;/pre&gt;
+
+
+&lt;p&gt;But the method above can be broken, and our weapon of choice is the infinite recursion loop:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Storage"&gt;def&lt;/span&gt; &lt;span class="Entity"&gt;loop&lt;/span&gt;: &lt;span class="Entity"&gt;Boolean&lt;/span&gt; = &lt;span class="Entity"&gt;loop&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This defines a function that calls itself. Note that because this is a &lt;em&gt;def&lt;/em&gt; and not
+a &lt;em&gt;val&lt;/em&gt;, the right-hand-side of the assignment is evaluated only when the function is
+called. &lt;em&gt;val&lt;/em&gt;, in contrast, evaluates the right-hand-side at definition time.&lt;/p&gt;
+
+&lt;p&gt;Now if we provide this function as an argument to our and-function, we see the following
+reduction happening (remember that Scala reduces by-value):&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  and2(false, loop)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Hangs when trying to evaluate the &amp;quot;loop&amp;quot; method&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;What we would expect is a short-circuit as soon as we see a false first argument. To
+achieve this, we can coax Scala into reducing a particular argument by-name instead:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Storage"&gt;def&lt;/span&gt; &lt;span class="Entity"&gt;and2&lt;/span&gt;(x: &lt;span class="Variable"&gt;Boolean&lt;/span&gt;, y:=&amp;gt; &lt;span class="Variable"&gt;Boolean&lt;/span&gt;) = if (&lt;span class="Variable"&gt;x&lt;/span&gt;) y else &lt;span class="Variable"&gt;false&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;The reduction for this would then be:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  and2(false, loop)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Keyword"&gt;if&lt;/span&gt; (false) loop &lt;span class="Keyword"&gt;else&lt;/span&gt; false
+       &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; false
+&lt;/pre&gt;
+
+
+&lt;p&gt;The infinite &lt;em&gt;loop&lt;/em&gt; is never evaluated, since we have forced Scala to evaluate the
+second parameter by-name instead of by-value. Hence, we achieve our desired behaviour.&lt;/p&gt;
+
+&lt;h2&gt;The Divide I: Infinite Loops&lt;/h2&gt;
+
+&lt;p&gt;Translating this functionality to Clojure seemed trivial until I slammed into some
+odd behaviour. To start with, let's write an innocent infinite loop function:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  (defn myLoop [] (myLoop))
+&lt;/pre&gt;
+
+
+&lt;p&gt;And let's run this method and watch it eat up our CPU:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  user&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; (myLoop)
+  StackOverflowError  user&lt;span class="Keyword"&gt;/&lt;/span&gt;myLoop (NO_SOURCE_FILE:&lt;span class="Constant"&gt;1&lt;/span&gt;)
+&lt;/pre&gt;
+
+
+&lt;p&gt;Unexpected, right? I was stumped! After a while being a headless chicken
+burrowing into the details of function argument reduction in Clojure, I
+stumbled onto &lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion"&gt;this illuminating blog post&lt;/a&gt;, comparing infinite loops
+in a number of languages. The sneaky culprit turned out to be
+&lt;em&gt;tail-call optimization&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Tail-Call Optimization&lt;/h3&gt;
+
+&lt;p&gt;Let's see what this means by a simple reduction example, applied to calculating
+the sum of ones upto &lt;em&gt;N&lt;/em&gt;. Here is the non-tail-call-optimized reduction:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  sumToN(&lt;span class="Constant"&gt;5&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;4&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;3&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;2&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;1&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; sumToN(1) returns&lt;/span&gt;
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;     &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; sumToN(2) returns&lt;/span&gt;
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;3&lt;/span&gt;         &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; sumToN(3) returns&lt;/span&gt;
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;4&lt;/span&gt;             &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; sumToN(4) returns&lt;/span&gt;
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;5&lt;/span&gt;                 &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; sumToN(5) returns &lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;Observe how the chain of execution gets wider with increasing &lt;em&gt;N&lt;/em&gt;. Each function call,
+is appended to the call stack. Once the last function has been reduced, only then is
+the stack collapsed by subsequently reducing each function. The function &lt;em&gt;sumToN&lt;/em&gt;
+has a &lt;em&gt;tail call&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Our &lt;em&gt;sumToN&lt;/em&gt; function can be optimized by simply
+adding an additional accumulator parameter. This parameter, along with the current
+&lt;em&gt;N&lt;/em&gt; value, maintains the &lt;em&gt;state&lt;/em&gt; of the function evaluation at that instant.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  sumToN(&lt;span class="Constant"&gt;0&lt;/span&gt;, &lt;span class="Constant"&gt;5&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;1&lt;/span&gt;, &lt;span class="Constant"&gt;4&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;2&lt;/span&gt;, &lt;span class="Constant"&gt;3&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;3&lt;/span&gt;, &lt;span class="Constant"&gt;2&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;4&lt;/span&gt;, &lt;span class="Constant"&gt;1&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; sumToN(&lt;span class="Constant"&gt;5&lt;/span&gt;, &lt;span class="Constant"&gt;0&lt;/span&gt;)
+    &lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;gt;&lt;/span&gt; &lt;span class="Constant"&gt;5&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;Notice how the evaluation of this function always has a constant tail length, and hence
+accumulates a constant amount of space on the call stack for any &lt;em&gt;N&lt;/em&gt; value.&lt;/p&gt;
+
+&lt;h3&gt;Scala Does Tail-Call Optimization By Default&lt;/h3&gt;
+
+&lt;p&gt;And this happens automatically. This is why the Scala infinite loop function we wrote
+earlier actually executed infinitely. In contrast, Clojure does not, and the infinite
+function additions to the call stack eventually triggers a stack overflow.&lt;/p&gt;
+
+&lt;h2&gt;The Divide II: Lazy Evaluation&lt;/h2&gt;
+
+&lt;p&gt;To mimic Scala's behaviour, let's enforce tail-call optimization in Clojure:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  (defn myLoop [] ((&lt;span class="Keyword"&gt;loop&lt;/span&gt; [] () (recur))))
+&lt;/pre&gt;
+
+
+&lt;p&gt;Now let's write an &lt;em&gt;and&lt;/em&gt; method and try the same exercise we did in Scala:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  user=&amp;gt; (defn and2 [x y] (&lt;span class="Keyword"&gt;if&lt;/span&gt; (= x true) y false))
+  &lt;span class="Constant"&gt;&lt;span class="Constant"&gt;#&lt;/span&gt;'user/and2&lt;/span&gt;
+  user=&amp;gt; (and2 false myLoop) &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;;&lt;/span&gt; Should short-circuit&lt;/span&gt;
+  false
+  user=&amp;gt; (and2 true myLoop)  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;;&lt;/span&gt; Should hang&lt;/span&gt;
+  &lt;span class="Constant"&gt;&lt;span class="Constant"&gt;#&lt;/span&gt;&amp;lt;user&lt;/span&gt;$myLoop user$myLoop@4d91f801&amp;gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This was unexpected. Where is our infinite loop?&lt;/p&gt;
+
+&lt;p&gt;The culprit this time turns out to be &lt;em&gt;lazy evaluation&lt;/em&gt;; a function is not
+evaluated to its value unless explicitly required. Clojure uses lazy evaluation
+by default, so instead of evaluating the function, it simply returns it to
+us, should we choose to explictly evaluate it later. In contrast, Scala
+begins evaluating the &lt;em&gt;loop&lt;/em&gt; function within the if-condition and hence
+runs into an infinite loop.&lt;/p&gt;
+
+&lt;h2&gt;Bonus Excercise: Lazy Evaluation In Haskell&lt;/h2&gt;
+
+&lt;p&gt;I don't know Haskell at all, but &lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion"&gt;this blog post&lt;/a&gt; pointed out an important
+difference between lazy evaluation in Haskell and Clojure. Consider this
+Haskell infinitely-recursive function:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  forever = forever
+&lt;/pre&gt;
+
+
+&lt;p&gt;When you call this function, it blocks infinitely, as expected. But in contrast
+to Clojure and Scala's infinite loops, this one uses no CPU! Why?&lt;/p&gt;
+
+&lt;p&gt;I'll quote the explanation provided in the comments to the original blog post here:&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;p&gt;Haskell has lazy evaluation and call-by-need semantics. Since you aren't doing anything with your forever function, it will never get evaluated. You have to enforce strict evaluation, by e.g. printing it out. (The same mistake is done on the Computer Language Benchmark Game. There's an Array sorting benchmark where Haskell just blows away even hand-optimized C. The secret is that the benchmark never prints out the contents of the sorted array. The C compiler isn't smart enough to recognize that the array is never actually used anywhere, but Haskell is, and so the entire benchmark basically compiles down to the equivalent of "int main() { return 0; }".)
+&lt;cite&gt;&lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion#comment-5326"&gt;Jörg W Mittag&lt;/a&gt;&lt;/cite&gt;&lt;/p&gt;&lt;/blockquote&gt;
+</content>
+    <summary type="html">Differences in Scala and Clojure.</summary>
+  </entry>
+  <entry>
+    <id>tag:eyeshalfclosed.com,2012-03-17:/blog/2012/03/17/throwing-darts/</id>
+    <title type="html">Throwing Darts</title>
+    <published>2012-03-16T18:30:00Z</published>
+    <updated>2012-03-16T18:30:00Z</updated>
+    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/"/>
+    <content type="html">&lt;p&gt;&lt;strong&gt;Update: November 6, 2012:&lt;/strong&gt; We further organized the content of this post and
+conducted a 3-hour &lt;a href="http://in.pycon.org/2012/funnel/pyconindia2012/55-simple-linux-cluster-with-python-and-beanstalkd"&gt;tutorial&lt;/a&gt;
+at PyCon India 2012. The source code and tutorial slides are available on our
+&lt;a href="https://github.com/emaadmanzoor/beanstalkd-pycon2012-tutorial/"&gt;Github repository&lt;/a&gt;.&lt;/p&gt;
+
+&lt;div class="presentation"&gt;
+    &lt;script async class="speakerdeck-embed" data-id="5078db60cd52500002042a24" data-ratio="1.3333333333333333" src="//speakerdeck.com/assets/embed.js"&gt;&lt;/script&gt;
+&lt;/div&gt;
+
+
+&lt;p&gt;This weekend was illuminating. We'd been assigned the task
+of building a compute cluster, with the freedom to intelligently
+choose every component of the distributed system. This post documents
+the how's and why's of building the system from the ground up with
+&lt;a href="https://github.com/kr/beanstalkd"&gt;Beanstalkd&lt;/a&gt; and running Python code to estimate π in parallel.&lt;/p&gt;
+
+&lt;h2&gt;Synopsis&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt; We used &lt;a href="https://github.com/kr/beanstalkd"&gt;Beanstalkd&lt;/a&gt; for our message queue.&lt;/li&gt;
+&lt;li&gt; We used &lt;a href="https://github.com/earl/beanstalkc"&gt;Beanstalkc&lt;/a&gt; for Python bindings.&lt;/li&gt;
+&lt;li&gt; Our system is &lt;em&gt;fully worker-fault-tolerant&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt; Our system is &lt;em&gt;partially server-fault-tolerant&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt; Our code is &lt;a href="https://github.com/emaadmanzoor/distributed-pi-estimation/"&gt;open-source&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;a name="contents"/&gt;&lt;/p&gt;
+
+&lt;h2&gt;Contents&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#purpose-and-design"&gt;Purpose And Background&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#setting-up"&gt;Setting Up Your Nodes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#write-code"&gt;Writing Some Code&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#fault-tolerance"&gt;Getting Fault Tolerant&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#reflections"&gt;Reflections&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;a name="purpose-and-design"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Purpose And Background&lt;/h2&gt;
+
+&lt;h3&gt;The Purpose&lt;/h3&gt;
+
+&lt;p&gt;The aim was to construct something reasonably fault tolerant that could
+execute simple parallel algorithms across a bunch of nodes, with a
+visible speed-up. Other motivations were to put together a system
+that could serve as a useful pedagogical tool for a parallel computing
+course, and to replace the cranky old Rocks cluster we currently tinker
+around with, with something more fun.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The Beef With MPICH&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;We began our experiments with &lt;a href="http://www.mcs.anl.gov/mpi/mpich1-old"&gt;MPICH&lt;/a&gt;, which seems to be the
+de facto standard for expressing parallel algorithms in code. We spent
+most of the day getting our nodes to talk to each other via SSH, which
+involved creating new users on each node, authorizing keys and a bunch
+of other annoying things that clutter your nodes up pretty bad.&lt;/p&gt;
+
+&lt;p&gt;Writing code the MPICH way is reminiscent of the fork() and PID-check pattern
+we use in single-node multi-process code. Each MPICH program is
+(from our experience) a single C file, with logic for the master interleaved
+with the logic for each worker node amongst a tangled net of &lt;em&gt;if-PID-equals-me&lt;/em&gt;
+conditions. Node failure was another animal, causing the entire program
+to stall indefinitely until the node was put back into action.&lt;/p&gt;
+
+&lt;p&gt;This was frustrating. Much thought went into understanding the flow of
+logic and the usual fight with C's idiosyncracies. Further, the idea
+of remotely executing multiple copies of the same binary and then
+collecting the results seemed suitable for short-running programs on
+well-behaved hardware, a luxury we didn't have.&lt;/p&gt;
+
+&lt;p&gt;We preferred something lazy, something more fluid. We wanted our workers
+to sit around on all nodes waiting for jobs to do. We wanted both our master
+and our workers to know only about the work that needs done, so they can
+be independently coded, debugged, tested and optimized.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Distributed Message Queues&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The concept is simple to grasp; a set of distributed FIFO queues accessible
+via TCP sockets. Producers push to the queue and consumers pull from the queue,
+with queue elements being any arbitrary data. The confusion begins when you sit
+down to evaluate the whole slew of message queueing solutions buzzing around
+the web these days.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;RabbitMQ&lt;/em&gt; and &lt;em&gt;ZeroMQ&lt;/em&gt; are probably the first options you'd come across. While
+very popular and performant, they are generic message queues. Our task
+involved a special subset of what a queue could serve, that of job queueing.
+We needed a mechanism to farm out jobs to workers, monitor their progress
+and do the necessary cleanup if a worker failed to perform. While we could
+build this functionality on top of a generic queueing solution, we weren't
+up for reinventing the wheel just yet.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Celery&lt;/em&gt; was one such specialized solution, but at first glance, seemed to be
+heavily tied in to Django applications. &lt;em&gt;Gearman&lt;/em&gt; was another that seemed
+seductively convenient; it brought with it an entire framework to farm out
+jobs, persist queues, accomodate job server failure and the works, but we
+decided to let it pass for something lighter until we figured out our own
+needs.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Beanstalkd&lt;/em&gt; fit the bill perfectly. It's the lightest work-queue solution
+we could find that supported some form of queue persistence and worker failure
+recovery. To top that off, getting a working Beanstalkd setup took all of
+ten minutes!&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;a href="#contents"&gt;Go back to the contents index&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name="setting-up"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Setting Up Your Nodes&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Prepare The Ingredients&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;You'll need to give the following some space on your local drive before
+we start doing anything cool:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt; &lt;em&gt;python-setuptools&lt;/em&gt; or &lt;em&gt;python-distribute&lt;/em&gt;: A bunch of utility scripts
+ to install Python modules; available via your package manager.&lt;/li&gt;
+&lt;li&gt; &lt;em&gt;Beanstalkd&lt;/em&gt;: The Beanstalk queue server; &lt;a href="http://kr.github.com/beanstalkd/download.html"&gt;download methods&lt;/a&gt;
+ exist for most package managers, but I'd recommend cloning the most recent version from
+ the &lt;a href="http://github.com/kr/beanstalkd"&gt;source at Github&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt; &lt;em&gt;Beanstalkc&lt;/em&gt;: Python bindings for Beanstalkd; you'll need to get
+ this from the &lt;a href="https://github.com/earl/beanstalkc"&gt;source&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt; &lt;em&gt;python-yaml&lt;/em&gt; or &lt;em&gt;pyYAML&lt;/em&gt;: Python libraries to parse YAML matter;
+ available via your package manager.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Beanstalkd&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;If you've installed Beanstalkd using your package manager, you won't need
+to compile the sources. If not, you'll need to change into the source directory to
+compile the source and run tests:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  $ make
+  $ ./check.sh
+&lt;/pre&gt;
+
+
+&lt;p&gt;Run the Beanstalk server on port 11300 (this is arbitrary) on your local host:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  $ beanstalkd -l 127.0.0.1 -p 11300
+&lt;/pre&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Beanstalkc&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;You'll just need to switch to the Beanstalkc source directory and run the
+provided install script:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  $ sudo python setup.py install
+&lt;/pre&gt;
+
+
+&lt;p&gt;&lt;strong&gt;Testing The Combination&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Fire up your Python REPL and mimic the statement flow in the listing below:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="Keyword"&gt;import&lt;/span&gt; beanstalkc
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; bean &lt;span class="Keyword"&gt;=&lt;/span&gt; beanstalkc.Connection(&lt;span class="Variable"&gt;host&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="String"&gt;&lt;span class="String"&gt;'&lt;/span&gt;127.0.0.1&lt;span class="String"&gt;'&lt;/span&gt;&lt;/span&gt;, &lt;span class="Variable"&gt;port&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Constant"&gt;11300&lt;/span&gt;)
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; bean.put(&lt;span class="String"&gt;&lt;span class="String"&gt;'&lt;/span&gt;Lala&lt;span class="String"&gt;'&lt;/span&gt;&lt;/span&gt;) 
+  &lt;span class="Constant"&gt;1&lt;/span&gt;
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; job &lt;span class="Keyword"&gt;=&lt;/span&gt; bean.reserve()
+  &lt;span class="Constant"&gt;1&lt;/span&gt;
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; job.body
+  Lala
+  &lt;span class="Keyword"&gt;&amp;gt;&amp;gt;&lt;/span&gt; job.delete()
+&lt;/pre&gt;
+
+
+&lt;p&gt;That's it, you've just created your first distributed task queue! The listing
+above created a connection to the queue and added a new task; tasks in Beanstalkd
+are always strings, any non-string data you send across must be serialized. We
+then &lt;em&gt;reserve&lt;/em&gt; a job from the queue, which is worker-slang for &lt;em&gt;"I'll work on this
+right now!"&lt;/em&gt;. Once you've reserved your job, you can retrieve its &lt;em&gt;body&lt;/em&gt; and
+pretend to do some work on it. When you're finished, you need to notify the
+Beanstalkd server by &lt;em&gt;deleting&lt;/em&gt; the job from the queue. If a worker fails to
+delete a job, the worker is forsaken and its job is placed back onto the
+tail of the queue after a specified time interval.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;a href="#contents"&gt;Go back to the contents index&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name="write-code"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Writing Some Code &lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;The Algorithm&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="pi-monte-carlo-algorithm.gif" title="Estimating Pi by a Monte-Carlo algorithm"/&gt;&lt;/p&gt;
+
+&lt;p&gt;The code for the algorithm was derived from that presented in &lt;a href="https://computing.llnl.gov/tutorials/parallel_comp/#ExamplesPI"&gt;Introduction to Parallel Computing&lt;/a&gt;.
+It turns out to be embarassingly parallel, and hence, easily implementable in a master-worker setup:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt; The master allocates to each worker the number of points to generate within the square.
+ The number of points is derived simply be splitting the total number of points we desire
+ among the number of workers we expect to have. More points lead to more accurate estimation.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The worker receives the number of points it must generate from the master, and then generates
+   those points, or throws those darts into the square. It calculates the number of darts that land
+   within the circle and returns the ratio of that to the total number of darts back to the master.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;&lt;strong&gt;System Design&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src="system-design.jpg" title="System design"/&gt;&lt;/p&gt;
+
+&lt;p&gt;The system follows a simple producer-consumer model. There are two queues; the one that the
+master &lt;em&gt;M&lt;/em&gt; pushes to and workers consume from is called &lt;em&gt;message-for-worker&lt;/em&gt;, and the one that
+the workers push to and the master consumes from is called &lt;em&gt;message-for-client&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;M&lt;/em&gt; accepts as a parameter &lt;em&gt;N&lt;/em&gt; the number of darts to throw, and &lt;em&gt;W&lt;/em&gt; as the
+number of workers it can expect to be active. It then splits the &lt;em&gt;N&lt;/em&gt; darts equally among &lt;em&gt;W&lt;/em&gt;
+workers and pushes each worker's quota to &lt;em&gt;message-for-worker&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Each worker consumes a single item &lt;em&gt;k&lt;/em&gt; from &lt;em&gt;message-for-worker&lt;/em&gt; and performs &lt;em&gt;f(k)&lt;/em&gt;: throwing
+&lt;em&gt;k&lt;/em&gt; darts into the square and then counting the number of darts &lt;em&gt;P&lt;sub&gt;i&lt;/sub&gt;&lt;/em&gt; falling within
+the circle. Each worker pushes its &lt;em&gt;P&lt;sub&gt;i&lt;/sub&gt;&lt;/em&gt; to &lt;em&gt;message-for-client&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;The master waits for all workers to complete, and then sums all the workers' responses in
+&lt;em&gt;message-for-client&lt;/em&gt;, divides by the total number of darts &lt;em&gt;N&lt;/em&gt; and multiplies the resultant
+by four to get the estimated value of π.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The Client Code&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;The complete and most recent code can be retrieved from the &lt;a href="https://github.com/emaadmanzoor/distributed-pi-estimation/"&gt;source&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The client code is easy to grok after having understood the algorithm it expresses and
+having read the &lt;a href="https://github.com/earl/beanstalkc/blob/master/TUTORIAL.mkd"&gt;Beanstalkc tutorial&lt;/a&gt;. The comments serve as pointers to Beanstalkd
+concepts that I've not explained in the prior sections&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Keyword"&gt;import&lt;/span&gt; beanstalkc
+
+  QUEUE_TO_USE &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;msg_for_worker&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+  QUEUE_TO_WATCH &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;msg_for_client&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+  QUEUE_TO_IGNORE &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;default&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This binds variables to the names of our queues for convenience. &lt;em&gt;default&lt;/em&gt; is a queue that
+is created by default by the Beanstalkd server, it would do us good to ignore it.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  N &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;10&lt;/span&gt; &lt;span class="Keyword"&gt;*&lt;/span&gt;&lt;span class="Keyword"&gt;*&lt;/span&gt; &lt;span class="Constant"&gt;6&lt;/span&gt;    &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Number of darts to throw in total&lt;/span&gt;
+  K &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;          &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Number of jobs to split the work into&lt;/span&gt;
+  TTR &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;40&lt;/span&gt;       &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Deadline for jobs to complete (seconds)&lt;/span&gt;
+
+  beanstalk &lt;span class="Keyword"&gt;=&lt;/span&gt; beanstalkc.Connection(&lt;span class="Variable"&gt;host&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;127.0.0.1&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, &lt;span class="Variable"&gt;port&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Constant"&gt;11300&lt;/span&gt;)
+
+  beanstalk.use(QUEUE_TO_USE)
+  beanstalk.watch(QUEUE_TO_WATCH)
+  beanstalk.ignore(QUEUE_TO_IGNORE)
+&lt;/pre&gt;
+
+
+&lt;p&gt;The first triplet of lines is something you'll need to be aware of and adapt to your
+scenario. &lt;em&gt;N&lt;/em&gt; is the total number of darts to throw, and directly affects the accuracy
+of your estimate and the computing power required. &lt;em&gt;K&lt;/em&gt; needs to be set equal to the
+number of worker nodes you expect to see active. Leaving these unchanged won't break
+any functionality, but it will leave you taking long coffee breaks until you see any
+meaningful results.&lt;/p&gt;
+
+&lt;p&gt;It also tells the Beanstalkd server which queues to &lt;em&gt;watch&lt;/em&gt;, or consume from, &lt;em&gt;use&lt;/em&gt;,
+or push to, and &lt;em&gt;ignore&lt;/em&gt;, which takes on its literal meaning this time.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  use_queue_was_full &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;False&lt;/span&gt;
+  &lt;span class="Keyword"&gt;while&lt;/span&gt; &lt;span class="Constant"&gt;True&lt;/span&gt;:  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Block until the queue we push to is empty&lt;/span&gt;
+      &lt;span class="Keyword"&gt;if&lt;/span&gt; (beanstalk.stats_tube(QUEUE_TO_USE)[&lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;current-jobs-ready&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;]
+          &lt;span class="Keyword"&gt;+&lt;/span&gt; beanstalk.stats_tube(QUEUE_TO_USE)[&lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;current-jobs-reserved&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;]) &lt;span class="Keyword"&gt;==&lt;/span&gt; &lt;span class="Constant"&gt;0&lt;/span&gt;:
+          &lt;span class="Keyword"&gt;break&lt;/span&gt;
+      &lt;span class="Keyword"&gt;else&lt;/span&gt;:
+          use_queue_was_full &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;True&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This segment of code enables &lt;a href="#fault-tolerance"&gt;server fault tolerance&lt;/a&gt;, which we discuss
+in a later section.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  points_per_job &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Support"&gt;int&lt;/span&gt;(N &lt;span class="Keyword"&gt;/&lt;/span&gt; K)
+  &lt;span class="Keyword"&gt;if&lt;/span&gt; &lt;span class="Keyword"&gt;not&lt;/span&gt; use_queue_was_full:
+      &lt;span class="Keyword"&gt;for&lt;/span&gt; i &lt;span class="Keyword"&gt;in&lt;/span&gt; &lt;span class="SupportFunction"&gt;range&lt;/span&gt;(K):  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Push all the jobs to the queue&lt;/span&gt;
+          &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Put job&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, &lt;span class="Support"&gt;str&lt;/span&gt;(i), &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;to job queue&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+          beanstalk.put(&lt;span class="Support"&gt;str&lt;/span&gt;(points_per_job), &lt;span class="Variable"&gt;ttr&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;TTR)
+      &lt;span class="Keyword"&gt;print&lt;/span&gt;
+
+  total_circle_count &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;0&lt;/span&gt;
+  responses_received &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;0&lt;/span&gt;
+  &lt;span class="Keyword"&gt;for&lt;/span&gt; i &lt;span class="Keyword"&gt;in&lt;/span&gt; &lt;span class="SupportFunction"&gt;range&lt;/span&gt;(K):
+      job &lt;span class="Keyword"&gt;=&lt;/span&gt; beanstalk.reserve()
+      responses_received &lt;span class="Keyword"&gt;+=&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt;
+      total_count &lt;span class="Keyword"&gt;=&lt;/span&gt; total_circle_count &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Support"&gt;int&lt;/span&gt;(job.body)
+      job.delete()
+      &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Received &lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Support"&gt;str&lt;/span&gt;(responses_received) &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;/&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Support"&gt;str&lt;/span&gt;(K) &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt; responses&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+  beanstalk.close()
+&lt;/pre&gt;
+
+
+&lt;p&gt;This segment pushes the worker quotas to the queue and waits for results. On
+receiving results, it accumulates them in a variable and then closes the connection
+to Beanstalkd.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  pi &lt;span class="Keyword"&gt;=&lt;/span&gt; (&lt;span class="Constant"&gt;4.0&lt;/span&gt; &lt;span class="Keyword"&gt;*&lt;/span&gt; total_count) &lt;span class="Keyword"&gt;/&lt;/span&gt; (responses_received &lt;span class="Keyword"&gt;*&lt;/span&gt; points_per_job)
+
+  &lt;span class="Keyword"&gt;print&lt;/span&gt;
+  &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;The value of pi is &lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Support"&gt;str&lt;/span&gt;(pi)
+  &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;That took &lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, &lt;span class="Support"&gt;str&lt;/span&gt;(time.time() &lt;span class="Keyword"&gt;-&lt;/span&gt; start_time), &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt; seconds!&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This uses the accumulated sum of the circle counts returned by the workers to
+compute the estimated value of π, in accordance with the algorithm described earlier.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;The Worker Code&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;The complete and most recent code can be retrieved from the &lt;a href="https://github.com/emaadmanzoor/distributed-pi-estimation/"&gt;source&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The worker code simply implements the algorithm in the context of the system, both of which
+have been described above. Most of the boilerplate matches that in the client, the differences
+have been briefly summarized below:n&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  &lt;span class="Keyword"&gt;while&lt;/span&gt; &lt;span class="Constant"&gt;True&lt;/span&gt;:                             &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Indefinitely wait for jobs to do&lt;/span&gt;
+
+      &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Connecting to job server...&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+      beanstalk &lt;span class="Keyword"&gt;=&lt;/span&gt; beanstalkc.Connection(&lt;span class="Variable"&gt;host&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="String"&gt;&lt;span class="String"&gt;'&lt;/span&gt;127.0.0.1&lt;span class="String"&gt;'&lt;/span&gt;&lt;/span&gt;, &lt;span class="Variable"&gt;port&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt;&lt;span class="Constant"&gt;11300&lt;/span&gt;)
+
+      beanstalk.watch(QUEUE_TO_WATCH)     &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Reserve jobs from this queue&lt;/span&gt;
+      beanstalk.ignore(QUEUE_TO_IGNORE)   &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Ignore this queue for reservation&lt;/span&gt;
+
+      &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Waiting for jobs...&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+      job &lt;span class="Keyword"&gt;=&lt;/span&gt; beanstalk.reserve()           &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Blocks until a job is available&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This makes our worker a &lt;em&gt;daemon&lt;/em&gt; of sorts; it sits around indefinitely, waiting for jobs to
+do, and on completion of a job, goes back to waiting for the next job to work on.&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  n &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Support"&gt;int&lt;/span&gt;(job.body)                   &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; n = number of darts to throw&lt;/span&gt;
+  start_time &lt;span class="Keyword"&gt;=&lt;/span&gt; time.time()
+
+  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Algorithm Reference: Monte-Carlo estimation of Pi&lt;/span&gt;
+  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Source: https://computing.llnl.gov/tutorials/parallel_comp/#ExamplesPI&lt;/span&gt;
+
+  square_edge &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;2.0&lt;/span&gt;                    &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Square edge length&lt;/span&gt;
+  center_x, center_y &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;1.0&lt;/span&gt;, &lt;span class="Constant"&gt;1.0&lt;/span&gt;        &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Circle center coordinates&lt;/span&gt;
+  radius &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;1.0&lt;/span&gt;                         &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Circle radius&lt;/span&gt;
+  circle_count &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;0&lt;/span&gt;                     &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Counts points within the circle&lt;/span&gt;
+
+  &lt;span class="Keyword"&gt;print&lt;/span&gt;
+  &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Generating&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, &lt;span class="Support"&gt;str&lt;/span&gt;(n), &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;points...&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class="Keyword"&gt;try&lt;/span&gt;:
+      &lt;span class="Keyword"&gt;for&lt;/span&gt; i &lt;span class="Keyword"&gt;in&lt;/span&gt; &lt;span class="Support"&gt;xrange&lt;/span&gt;(n):
+          x &lt;span class="Keyword"&gt;=&lt;/span&gt; random.random() &lt;span class="Keyword"&gt;*&lt;/span&gt; square_edge        &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; 0 &amp;lt;= x &amp;lt; square_edge&lt;/span&gt;
+          y &lt;span class="Keyword"&gt;=&lt;/span&gt; random.random() &lt;span class="Keyword"&gt;*&lt;/span&gt; square_edge        &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; 0 &amp;lt;= y &amp;lt; square_edge&lt;/span&gt;
+          &lt;span class="Keyword"&gt;if&lt;/span&gt; (x &lt;span class="Keyword"&gt;-&lt;/span&gt; center_x) &lt;span class="Keyword"&gt;*&lt;/span&gt;&lt;span class="Keyword"&gt;*&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt; &lt;span class="Keyword"&gt;+&lt;/span&gt; (y &lt;span class="Keyword"&gt;-&lt;/span&gt; center_y) &lt;span class="Keyword"&gt;*&lt;/span&gt;&lt;span class="Keyword"&gt;*&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt; &lt;span class="Keyword"&gt;&amp;lt;&lt;/span&gt;&lt;span class="Keyword"&gt;=&lt;/span&gt; radius &lt;span class="Keyword"&gt;*&lt;/span&gt;&lt;span class="Keyword"&gt;*&lt;/span&gt; &lt;span class="Constant"&gt;2&lt;/span&gt;:
+              circle_count &lt;span class="Keyword"&gt;=&lt;/span&gt; circle_count &lt;span class="Keyword"&gt;+&lt;/span&gt; &lt;span class="Constant"&gt;1&lt;/span&gt;
+  &lt;span class="Keyword"&gt;except&lt;/span&gt; &lt;span class="Support"&gt;Exception&lt;/span&gt;:
+      &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Job failed.&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, n
+      job.release()
+
+  beanstalk.use(QUEUE_TO_USE)         &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Push the calculated number of points&lt;/span&gt;
+  beanstalk.put(&lt;span class="Support"&gt;str&lt;/span&gt;(circle_count))    &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; in the circle to the client queue&lt;/span&gt;
+
+  job.delete()                        &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Tell the job server you're done&lt;/span&gt;
+  beanstalk.close()
+
+  &lt;span class="Keyword"&gt;print&lt;/span&gt; &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;Finished job in&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;, &lt;span class="Support"&gt;str&lt;/span&gt;(time.time() &lt;span class="Keyword"&gt;-&lt;/span&gt; start_time), &lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;seconds&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;
+  &lt;span class="Keyword"&gt;print&lt;/span&gt;
+&lt;/pre&gt;
+
+
+&lt;p&gt;This simply implements the estimation algorithm discussed in an earlier section.
+The result of the algorithm is pushed to &lt;em&gt;QUEUE_TO_USE&lt;/em&gt; by the worker.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Blast Off&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Getting the code running involves simply running the worker Python script on a number
+of terminals to spawn as many workers as you need, and then starting the client Python
+code to farm out jobs to the workers. If you're attempting this in a distributed setup,
+ensure you make the necessary modifications in the server address and port.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;a href="#contents"&gt;Go back to the contents index&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name="fault-tolerance"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Getting Fault Tolerant&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Worker Fault Tolerance&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Worker fault tolerance is baked in to the Beanstalkd architecture. Workers work on
+jobs from the queue by &lt;em&gt;reserving&lt;/em&gt; them. On completion, they are expected to &lt;em&gt;delete&lt;/em&gt;
+the job from the queue, which is a way of notifying the server that it has completed
+its job. If, however, a worker fails to &lt;em&gt;delete&lt;/em&gt; a job within a configurable time
+interval &lt;em&gt;TTR&lt;/em&gt;, the job is re-added to the tail of the queue. Thus, in the worst case
+when all but one worker fail, the single worker will sequentially consume and work
+on all the items in its queue.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Server Fault Tolerance&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;To provide some form of persistence for the in-memory queue, Beanstalkd supports an
+option called &lt;em&gt;binlog&lt;/em&gt;. Enabled with the &lt;em&gt;b &lt;directory&gt;&lt;/em&gt; option to the Beanstalkd
+executable, this periodically stores the state of the queue to a flat file in the
+directory specified. On restarting from server failure with the &lt;em&gt;-b&lt;/em&gt; switch, the
+in-memory queue is reconstructed from the files in this directory.&lt;/p&gt;
+
+&lt;p&gt;However, to take advantage of server restarts and the &lt;em&gt;binlog&lt;/em&gt;, the client code will
+need to be augmented with some failure-resume intelligence. In particular, the client
+must not re-push data into its queue if there exist items remaining from before the
+server failed. This is enabled with this bit of code in the client:&lt;/p&gt;
+
+&lt;pre class="sunburst"&gt;
+  use_queue_was_full &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;False&lt;/span&gt;
+  &lt;span class="Keyword"&gt;while&lt;/span&gt; &lt;span class="Constant"&gt;True&lt;/span&gt;:  &lt;span class="Comment"&gt;&lt;span class="Comment"&gt;#&lt;/span&gt; Block until the queue we push to is empty&lt;/span&gt;
+      &lt;span class="Keyword"&gt;if&lt;/span&gt; (beanstalk.stats_tube(QUEUE_TO_USE)[&lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;current-jobs-ready&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;]
+          &lt;span class="Keyword"&gt;+&lt;/span&gt; beanstalk.stats_tube(QUEUE_TO_USE)[&lt;span class="String"&gt;&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;current-jobs-reserved&lt;span class="String"&gt;&amp;quot;&lt;/span&gt;&lt;/span&gt;]) &lt;span class="Keyword"&gt;==&lt;/span&gt; &lt;span class="Constant"&gt;0&lt;/span&gt;:
+          &lt;span class="Keyword"&gt;break&lt;/span&gt;
+      &lt;span class="Keyword"&gt;else&lt;/span&gt;:
+          use_queue_was_full &lt;span class="Keyword"&gt;=&lt;/span&gt; &lt;span class="Constant"&gt;True&lt;/span&gt; 
+&lt;/pre&gt;
+
+
+&lt;p&gt;This uses Beanstalkd's statistics queries to gain information about the number of items
+in the queue it's pushing to. Until that queue is empty, it blocks and waits.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;a href="#contents"&gt;Go back to the contents index&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name="reflections"&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Reflections&lt;/h2&gt;
+
+&lt;p&gt;I can't help reflecting on how difficult it was to predict when our nodes
+would turn nasty. Even though we were looking through layers of well organized
+cellophane; our &lt;a href="https://github.com/emaadmanzoor/distributed-pi-estimation/"&gt;own code&lt;/a&gt;, a &lt;a href="https://github.com/kr/beanstalkd"&gt;minimalistic backbone&lt;/a&gt; and simple socket IO.&lt;/p&gt;
+
+&lt;p&gt;What if, instead, we were obliged to build an underground piping system
+for drinking water? With no web interface to monitor leaky hardware, no Nagios
+alerts when rodent miscreants chew threw your valves, and misbehaving pipes
+occasionally sharing their contents, causing much bowel discomfort for the
+townspeople.&lt;/p&gt;
+
+&lt;p&gt;Not to mention you'd have to dig up a lot of mud to fix things.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;a href="#contents"&gt;Go back to the contents index&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+</content>
+    <summary type="html">Estimating π on a beanstalkd cluster.</summary>
+  </entry>
+  <entry>
+    <id>tag:eyeshalfclosed.com,2012-03-03:/blog/2012/03/03/getting-things-done/</id>
+    <title type="html">The Finish Line</title>
+    <published>2012-03-02T18:30:00Z</published>
+    <updated>2012-03-02T18:30:00Z</updated>
+    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/03/03/getting-things-done/"/>
+    <content type="html">&lt;p&gt;&lt;strong&gt;I need to follow the breadcrumbs back.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In the excitement and belief that it's always a good thing,
+we strive to make progress, to start things, build something new,
+resonating to the ring of a different, if not better, tomorrow.&lt;/p&gt;
+
+&lt;p&gt;Clambering along the strands of the interweb, clicking through
+links like hammers against the Berlin wall, making progress,
+our neurons process pixel after pixel into meaning, evolving
+hoarded information into ideas we contribute back, for others
+to consume and evolve in turn.&lt;/p&gt;
+
+&lt;p&gt;When the neural sweatshop shuts for the day, I ask myself:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;em&gt;What have I finished today?&lt;/em&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The price of incompletion is high, something I realised while
+working my way through &lt;a href="http://www.interviewstreet.com"&gt;Interview Street&lt;/a&gt;,
+where one is eligible to apply for companies only after
+solving 7 questions &lt;em&gt;completely&lt;/em&gt;. &lt;em&gt;Almost&lt;/em&gt; solving a dozen questions
+only implies the inability to construct a complete solution.&lt;/p&gt;
+
+&lt;p&gt;It's time I stop running in circles and inch towards the finish line.
+I'm following the breadcrumbs back to pick up the pieces. It's time
+I start building the wholes to which they belong.&lt;/p&gt;
+
+&lt;h2&gt;Reference&lt;/h2&gt;
+
+&lt;blockquote&gt;&lt;p&gt;I make sure to start every day as a producer, not a consumer.&lt;/p&gt;
+
+&lt;p&gt;When you get up, you may start with a good routine like showering and eating, but as soon as you find yourself with some free time you probably get that urge to check Reddit, open that game you were playing, see what you're missing on Facebook, etc.&lt;/p&gt;
+
+&lt;p&gt;Put all of this off until "later". Start your first free moments of the day with thoughts of what you really want to do; those long-term things you're working on, or even the basic stuff you need to do today, like cooking, getting ready for exercise, etc.&lt;/p&gt;
+
+&lt;p&gt;This keeps you from falling into the needy consumer mindset. That mindset where you find yourself endlessly surfing Reddit, Facebook, etc. trying to fill a void in yourself, trying to find out what you're missing, but never feeling satisfied.&lt;/p&gt;
+
+&lt;p&gt;When you've started your day with doing awesome (not necessarily difficult) things for yourself, these distractions start to feel like a waste of time. You check Facebook just to make sure you're not missing anything important directed at you, but scrolling down and reading random stuff in your feed feels like stepping out into the Disneyland parking lot to listen to what's playing on the car radio - a complete waste of time compared to what you're really doing today.&lt;/p&gt;
+
+&lt;p&gt;It sounds subtle, but these are the only days where I find myself getting anything done. I either start my day like this and feel normal and productive, or I look up and realize it's early evening, I haven't accomplished anything and I can't bring myself to focus no matter how hard I want to.&lt;/p&gt;
+
+&lt;p&gt;&lt;cite&gt;&lt;a href="http://www.reddit.com/r/Fitness/comments/pbjk1/what_are_the_small_lifestyle_changes_youve_made/c3o3ejr"&gt;Reddit&lt;/a&gt;&lt;/cite&gt;&lt;/p&gt;&lt;/blockquote&gt;
+</content>
+    <summary type="html">On getting things done.</summary>
+  </entry>
+  <entry>
+    <id>tag:eyeshalfclosed.com,2012-01-14:/blog/2012/01/14/compiled-are-i/</id>
+    <title type="html">Compiled Are I</title>
+    <published>2012-01-13T18:30:00Z</published>
+    <updated>2012-01-13T18:30:00Z</updated>
+    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/01/14/compiled-are-i/"/>
+    <content type="html">&lt;blockquote&gt;&lt;p&gt;While I’m not specifically trained as an author of prose,
+I &lt;em&gt;am&lt;/em&gt; trained as an author of code. What would happen if
+I approached blogging from a software development perspective?
+What would that look like?
+&lt;cite&gt;Tom Preston-Werner&lt;/cite&gt;&lt;/p&gt;&lt;/blockquote&gt;
+
+&lt;p&gt;I feel alone, the pixels from &lt;a href="http://tom.preston-werner.com/2008/11/17/blogging-like-a-hacker.html"&gt;Blogging Like A Hacker&lt;/a&gt;
+speaking of freedom and peace in minimalism and simplicity, and
+feel the weight of a time long past since some first seeked the
+right tools to build their prose.&lt;/p&gt;
+
+&lt;p&gt;Though a bit too late, I have suffered the same itch, spent
+time scrutinizing their remedies, and come to adopt a cure that
+leaves me content. Hence, I leave my share of fresh debris on
+this old field, in the hope that it serves some whom none
+could before.&lt;/p&gt;
+
+&lt;h2&gt;The Choice&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href="http://iwantmyname.com/blog/2011/02/list-static-website-generators.html"&gt;Many&lt;/a&gt; cures exist. Most were short-lived, personal hacks
+lacking documentation effort, of which the popular ones made
+up for with their expressive community. I was looking for the
+perfect blend of malleability, strength and a good instruction manual.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="http://cloudhead.io/toto"&gt;&lt;strong&gt;toto&lt;/strong&gt;&lt;/a&gt;: Tiny (~300 sloc), built to work with git and
+Heroku out of the box, this was my dream engine for a while; then
+I realised it's a bit too tied in with Heroku for my comfort (I'm
+forced to live behind a draconian proxy). It has a bunch of features
+that I'm still working on incorporating into my current cure, and
+this &lt;a href="http://fadeyev.net/2010/05/10/getting-started-with-toto/"&gt;beautiful guide&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="http://jekyllrb.com/"&gt;&lt;strong&gt;Jekyll&lt;/strong&gt;&lt;/a&gt;: Possibly the most popular of the lot, with a
+really neat &lt;a href="http://octopress.org/"&gt;framework&lt;/a&gt; to get started with, and solid backing
+from the big players (Github Pages uses this) and community. Perfect
+for the blogger focused on blogging, with no desires to spend time
+tweaking their platform to perform silly stunts.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="http://nanoc.stoneship.org/"&gt;&lt;strong&gt;nanoc&lt;/strong&gt;&lt;/a&gt;: My pick, and my reasons for this can also be
+counted as my reasons against the options above:&lt;/p&gt;
+
+&lt;p&gt;  i. &lt;em&gt;Actively maintained&lt;/em&gt;: The release at the time of this
+  post was on January 9, 2012. They've got a pretty
+  busy forum and an IRC channel too, and seeing Denis
+  (the creator) still involved after having created it way
+  back in 2007 instills some amount of faith in the project.&lt;/p&gt;
+
+&lt;p&gt;  ii. &lt;em&gt;Brilliantly documented&lt;/em&gt;: This engine has the most
+  extensive, in-depth documentation of the one's I've
+  evaluated. This includes API documentation, a bunch of
+  mini-tutorials on customizing the engine, some deployment
+  and best-practices guides and a whole lot of community-
+  contributed material.&lt;/p&gt;
+
+&lt;p&gt;  iii. &lt;em&gt;Powerful&lt;/em&gt;: This could be a corollary of the two
+  above; with the depth of documentation at hand, anyone
+  with basic Ruby skills can extend the engine to perform
+  breathtaking acrobatic manoeuvers.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;h2&gt;The Switch&lt;/h2&gt;
+
+&lt;p&gt;The power of customizability carries the burden of the
+time it consumes. Ideally, you'd tweak until it's just
+perfect, when really, it never is. The switch was meant
+to be painless, but the more I realised was possible, the
+longer the silence on my &lt;a href="http://halfclosed.wordpress.com/"&gt;old blog&lt;/a&gt;, as I toiled
+behind my shiny new nanoc3 site hosted on Heroku.&lt;/p&gt;
+
+&lt;p&gt;This post was intended to be a practical, comprehensive
+guide to the switch from Wordpress, but the
+time lapsed between that process and now leaves me
+with just a bunch of references that guided me through.&lt;/p&gt;
+
+&lt;h2&gt;References&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="https://github.com/mgutz/nanoc3_blog"&gt;&lt;strong&gt;nanoc3_blog&lt;/strong&gt;&lt;/a&gt;: A
+well done starter kit for nanoc3, with minimalistic styling
+and a bunch of useful blog features like archives, tags and
+pages.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="https://github.com/kamui/nanoc-fuel"&gt;&lt;strong&gt;nanoc_fuel&lt;/strong&gt;&lt;/a&gt;: The
+one stop solution to adding Facebook likes and comments to
+your nanoc3 blog.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href="http://octopress.org/"&gt;&lt;strong&gt;Octopress&lt;/strong&gt;&lt;/a&gt;: While a Jekyll framework, the features
+curated by this project are easily embeddable into any nanoc3
+blog.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;The switch is quickest if you know exactly what you want, and
+can dabble in Ruby without fear. While you're at it, the place
+to be is the &lt;a href="http://groups.google.com/group/nanoc"&gt;nanoc group&lt;/a&gt;.&lt;/p&gt;
+</content>
+    <summary type="html">On the switch to nanoc.</summary>
+  </entry>
+</feed>

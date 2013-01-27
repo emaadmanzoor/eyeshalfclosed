@@ -83,7 +83,7 @@ def prepare!
   %x[git checkout master]
   unless %x[git status] =~ /nothing to commit \(working directory clean\)/
     puts "Please commit your changes on the master branch before deploying!"
-    exit 1
+    #exit 1
   end
 
   puts "Creating and moving in to \"deployment\" branch.."

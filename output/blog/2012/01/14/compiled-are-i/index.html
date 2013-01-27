@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Compiled Are I</title>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta content="On the switch to nanoc." name="description">
+<meta content="width=320" name="viewport">
+<link href="http://eyeshalfclosed.com/blog/assets/css/reset.css" rel="stylesheet" type="text/css">
+<link href="http://eyeshalfclosed.com/blog/assets/css/sunburst.css" media="screen" rel="stylesheet" type="text/css">
+<link href="http://eyeshalfclosed.com/blog/assets/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<script src="http://eyeshalfclosed.com/blog/assets/js/jquery.js" type="text/javascript"></script><script src="http://eyeshalfclosed.com/blog/assets/js/jquery-tapir-min.js" type="text/javascript"></script><link href="http://eyeshalfclosed.com/blog/favicon.ico" rel="icon" type="image/x-icon">
+<link href="http://eyeshalfclosed.com/blog/favicon.ico" rel="shortcut icon" type="image/x-icon">
+</head>
+<body>
+    <div id="main">
+      <div id="header">
+        <div id="nav">
+          <ul>
+<li>
+              <a href="http://eyeshalfclosed.com/">home</a>
+            </li>
+            <li>
+              ·
+            </li>
+            <li>
+              <a href="../../../../">
+                index
+              </a>
+            </li>
+            <li>
+              ·
+            </li>
+            <li>
+              <a href="http://feeds.feedburner.com/eyeshalfclosed">feed</a>
+            </li>
+          </ul>
+</div>
+      </div>
+      <div class="article">
+  <h1 class="article_title">
+    Compiled Are I
+  </h1>
+  <div class="meta">
+    <ul>
+<li>
+        On
+        Jan 14, 2012
+      </li>
+      <li>
+        By
+        <a href="http://github.com/emaadmanzoor">
+          Emaad Ahmed Manzoor
+        </a>
+      </li>
+    </ul>
+</div>
+  <div class="body">
+    <blockquote><p>While I’m not specifically trained as an author of prose,
+I <em>am</em> trained as an author of code. What would happen if
+I approached blogging from a software development perspective?
+What would that look like?
+<cite>Tom Preston-Werner</cite></p></blockquote>
+
+<p>I feel alone, the pixels from <a href="http://tom.preston-werner.com/2008/11/17/blogging-like-a-hacker.html">Blogging Like A Hacker</a>
+speaking of freedom and peace in minimalism and simplicity, and
+feel the weight of a time long past since some first seeked the
+right tools to build their prose.</p>
+
+<p>Though a bit too late, I have suffered the same itch, spent
+time scrutinizing their remedies, and come to adopt a cure that
+leaves me content. Hence, I leave my share of fresh debris on
+this old field, in the hope that it serves some whom none
+could before.</p>
+
+<h2>The Choice</h2>
+
+<p><a href="http://iwantmyname.com/blog/2011/02/list-static-website-generators.html">Many</a> cures exist. Most were short-lived, personal hacks
+lacking documentation effort, of which the popular ones made
+up for with their expressive community. I was looking for the
+perfect blend of malleability, strength and a good instruction manual.</p>
+
+<ol>
+<li><p><a href="http://cloudhead.io/toto"><strong>toto</strong></a>: Tiny (~300 sloc), built to work with git and
+Heroku out of the box, this was my dream engine for a while; then
+I realised it's a bit too tied in with Heroku for my comfort (I'm
+forced to live behind a draconian proxy). It has a bunch of features
+that I'm still working on incorporating into my current cure, and
+this <a href="http://fadeyev.net/2010/05/10/getting-started-with-toto/">beautiful guide</a>.</p></li>
+<li><p><a href="http://jekyllrb.com/"><strong>Jekyll</strong></a>: Possibly the most popular of the lot, with a
+really neat <a href="http://octopress.org/">framework</a> to get started with, and solid backing
+from the big players (Github Pages uses this) and community. Perfect
+for the blogger focused on blogging, with no desires to spend time
+tweaking their platform to perform silly stunts.</p></li>
+<li>
+<p><a href="http://nanoc.stoneship.org/"><strong>nanoc</strong></a>: My pick, and my reasons for this can also be
+counted as my reasons against the options above:</p>
+
+<p>  i. <em>Actively maintained</em>: The release at the time of this
+  post was on January 9, 2012. They've got a pretty
+  busy forum and an IRC channel too, and seeing Denis
+  (the creator) still involved after having created it way
+  back in 2007 instills some amount of faith in the project.</p>
+
+<p>  ii. <em>Brilliantly documented</em>: This engine has the most
+  extensive, in-depth documentation of the one's I've
+  evaluated. This includes API documentation, a bunch of
+  mini-tutorials on customizing the engine, some deployment
+  and best-practices guides and a whole lot of community-
+  contributed material.</p>
+
+<p>  iii. <em>Powerful</em>: This could be a corollary of the two
+  above; with the depth of documentation at hand, anyone
+  with basic Ruby skills can extend the engine to perform
+  breathtaking acrobatic manoeuvers.</p>
+</li>
+</ol>
+<h2>The Switch</h2>
+
+<p>The power of customizability carries the burden of the
+time it consumes. Ideally, you'd tweak until it's just
+perfect, when really, it never is. The switch was meant
+to be painless, but the more I realised was possible, the
+longer the silence on my <a href="http://halfclosed.wordpress.com/">old blog</a>, as I toiled
+behind my shiny new nanoc3 site hosted on Heroku.</p>
+
+<p>This post was intended to be a practical, comprehensive
+guide to the switch from Wordpress, but the
+time lapsed between that process and now leaves me
+with just a bunch of references that guided me through.</p>
+
+<h2>References</h2>
+
+<ol>
+<li><p><a href="https://github.com/mgutz/nanoc3_blog"><strong>nanoc3_blog</strong></a>: A
+well done starter kit for nanoc3, with minimalistic styling
+and a bunch of useful blog features like archives, tags and
+pages.</p></li>
+<li><p><a href="https://github.com/kamui/nanoc-fuel"><strong>nanoc_fuel</strong></a>: The
+one stop solution to adding Facebook likes and comments to
+your nanoc3 blog.</p></li>
+<li><p><a href="http://octopress.org/"><strong>Octopress</strong></a>: While a Jekyll framework, the features
+curated by this project are easily embeddable into any nanoc3
+blog.</p></li>
+</ol>
+<p>The switch is quickest if you know exactly what you want, and
+can dabble in Ruby without fear. While you're at it, the place
+to be is the <a href="http://groups.google.com/group/nanoc">nanoc group</a>.</p>
+  </div>
+</div>
+      <div id="other-articles">
+        <div class="older">
+          <ul></ul>
+</div>
+        <div class="newer">
+          <ul>
+<li>
+              <h3>
+                <a href="../../../03/03/getting-things-done/" title="On getting things done.">
+                  The Finish Line »
+                </a>
+              </h3>
+            </li>
+          </ul>
+</div>
+      </div>
+      <div class="clear"></div>
+      <div class="comments">
+        <div id="disqus_thread"></div>
+        <script src="http://disqus.com/forums/eyeshalfclosed/embed.js" type="text/javascript"></script><noscript>
+          <a href="http://disqus.com/forums/eyeshalfclosed/?url=ref">
+            View the discussion thread
+          </a>
+        </noscript>
+      </div>
+      <!-- / disqus adds too much visual crap -->
+      <style type="text/css">
+        .dsq-dc-logo {
+          display: none !important; }
+      </style>
+<div id="page-footer">
+        Crafted with
+        <a href="http://nanoc.stoneship.org/">
+          nanoc
+        </a>
+         
+        ·
+         
+        Source on
+        <a href="http://github.com/emaadmanzoor/eyeshalfclosed/">
+          Github
+        </a>
+        <br>
+</div>
+    </div>
+    <script>
+      //<![CDATA[
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-36072775-1']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      //]]>
+    </script>
+</body>
+</html>

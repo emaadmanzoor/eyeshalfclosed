@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Throwing Darts</title>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+<meta content="Estimating π on a beanstalkd cluster." name="description">
+<meta content="width=320" name="viewport">
+<link href="http://eyeshalfclosed.com/blog/assets/css/reset.css" rel="stylesheet" type="text/css">
+<link href="http://eyeshalfclosed.com/blog/assets/css/sunburst.css" media="screen" rel="stylesheet" type="text/css">
+<link href="http://eyeshalfclosed.com/blog/assets/css/style.css" media="screen" rel="stylesheet" type="text/css">
+<script src="http://eyeshalfclosed.com/blog/assets/js/jquery.js" type="text/javascript"></script><script src="http://eyeshalfclosed.com/blog/assets/js/jquery-tapir-min.js" type="text/javascript"></script><link href="http://eyeshalfclosed.com/blog/favicon.ico" rel="icon" type="image/x-icon">
+<link href="http://eyeshalfclosed.com/blog/favicon.ico" rel="shortcut icon" type="image/x-icon">
+</head>
+<body>
+    <div id="main">
+      <div id="header">
+        <div id="nav">
+          <ul>
+<li>
+              <a href="http://eyeshalfclosed.com/">home</a>
+            </li>
+            <li>
+              ·
+            </li>
+            <li>
+              <a href="../../../../">
+                index
+              </a>
+            </li>
+            <li>
+              ·
+            </li>
+            <li>
+              <a href="http://feeds.feedburner.com/eyeshalfclosed">feed</a>
+            </li>
+          </ul>
+</div>
+      </div>
+      <div class="article">
+  <h1 class="article_title">
+    Throwing Darts
+  </h1>
+  <div class="meta">
+    <ul>
+<li>
+        On
+        Mar 17, 2012
+      </li>
+      <li>
+        By
+        <a href="http://github.com/emaadmanzoor">
+          Emaad Ahmed Manzoor
+        </a>
+      </li>
+    </ul>
+</div>
+  <div class="body">
+    <p><strong>Update: November 6, 2012:</strong> We further organized the content of this post and
+conducted a 3-hour <a href="http://in.pycon.org/2012/funnel/pyconindia2012/55-simple-linux-cluster-with-python-and-beanstalkd">tutorial</a>
+at PyCon India 2012. The source code and tutorial slides are available on our
+<a href="https://github.com/emaadmanzoor/beanstalkd-pycon2012-tutorial/">Github repository</a>.</p>
+
+<div class="presentation">
+    <script async class="speakerdeck-embed" data-id="5078db60cd52500002042a24" data-ratio="1.3333333333333333" src="//speakerdeck.com/assets/embed.js"></script>
+</div>
+
+
+<p>This weekend was illuminating. We'd been assigned the task
+of building a compute cluster, with the freedom to intelligently
+choose every component of the distributed system. This post documents
+the how's and why's of building the system from the ground up with
+<a href="https://github.com/kr/beanstalkd">Beanstalkd</a> and running Python code to estimate π in parallel.</p>
+
+<h2>Synopsis</h2>
+
+<ul>
+<li> We used <a href="https://github.com/kr/beanstalkd">Beanstalkd</a> for our message queue.</li>
+<li> We used <a href="https://github.com/earl/beanstalkc">Beanstalkc</a> for Python bindings.</li>
+<li> Our system is <em>fully worker-fault-tolerant</em>.</li>
+<li> Our system is <em>partially server-fault-tolerant</em>.</li>
+<li> Our code is <a href="https://github.com/emaadmanzoor/distributed-pi-estimation/">open-source</a>.</li>
+</ul>
+<p><a name="contents"></a></p>
+
+<h2>Contents</h2>
+
+<ol>
+<li><a href="#purpose-and-design">Purpose And Background</a></li>
+<li><a href="#setting-up">Setting Up Your Nodes</a></li>
+<li><a href="#write-code">Writing Some Code</a></li>
+<li><a href="#fault-tolerance">Getting Fault Tolerant</a></li>
+<li><a href="#reflections">Reflections</a></li>
+</ol>
+<p><a name="purpose-and-design"></a></p>
+
+<h2>Purpose And Background</h2>
+
+<h3>The Purpose</h3>
+
+<p>The aim was to construct something reasonably fault tolerant that could
+execute simple parallel algorithms across a bunch of nodes, with a
+visible speed-up. Other motivations were to put together a system
+that could serve as a useful pedagogical tool for a parallel computing
+course, and to replace the cranky old Rocks cluster we currently tinker
+around with, with something more fun.</p>
+
+<p><strong>The Beef With MPICH</strong></p>
+
+<p>We began our experiments with <a href="http://www.mcs.anl.gov/mpi/mpich1-old">MPICH</a>, which seems to be the
+de facto standard for expressing parallel algorithms in code. We spent
+most of the day getting our nodes to talk to each other via SSH, which
+involved creating new users on each node, authorizing keys and a bunch
+of other annoying things that clutter your nodes up pretty bad.</p>
+
+<p>Writing code the MPICH way is reminiscent of the fork() and PID-check pattern
+we use in single-node multi-process code. Each MPICH program is
+(from our experience) a single C file, with logic for the master interleaved
+with the logic for each worker node amongst a tangled net of <em>if-PID-equals-me</em>
+conditions. Node failure was another animal, causing the entire program
+to stall indefinitely until the node was put back into action.</p>
+
+<p>This was frustrating. Much thought went into understanding the flow of
+logic and the usual fight with C's idiosyncracies. Further, the idea
+of remotely executing multiple copies of the same binary and then
+collecting the results seemed suitable for short-running programs on
+well-behaved hardware, a luxury we didn't have.</p>
+
+<p>We preferred something lazy, something more fluid. We wanted our workers
+to sit around on all nodes waiting for jobs to do. We wanted both our master
+and our workers to know only about the work that needs done, so they can
+be independently coded, debugged, tested and optimized.</p>
+
+<p><strong>Distributed Message Queues</strong></p>
+
+<p>The concept is simple to grasp; a set of distributed FIFO queues accessible
+via TCP sockets. Producers push to the queue and consumers pull from the queue,
+with queue elements being any arbitrary data. The confusion begins when you sit
+down to evaluate the whole slew of message queueing solutions buzzing around
+the web these days.</p>
+
+<p><em>RabbitMQ</em> and <em>ZeroMQ</em> are probably the first options you'd come across. While
+very popular and performant, they are generic message queues. Our task
+involved a special subset of what a queue could serve, that of job queueing.
+We needed a mechanism to farm out jobs to workers, monitor their progress
+and do the necessary cleanup if a worker failed to perform. While we could
+build this functionality on top of a generic queueing solution, we weren't
+up for reinventing the wheel just yet.</p>
+
+<p><em>Celery</em> was one such specialized solution, but at first glance, seemed to be
+heavily tied in to Django applications. <em>Gearman</em> was another that seemed
+seductively convenient; it brought with it an entire framework to farm out
+jobs, persist queues, accomodate job server failure and the works, but we
+decided to let it pass for something lighter until we figured out our own
+needs.</p>
+
+<p><em>Beanstalkd</em> fit the bill perfectly. It's the lightest work-queue solution
+we could find that supported some form of queue persistence and worker failure
+recovery. To top that off, getting a working Beanstalkd setup took all of
+ten minutes!</p>
+
+<p><em><a href="#contents">Go back to the contents index</a></em></p>
+
+<p><a name="setting-up"></a></p>
+
+<h2>Setting Up Your Nodes</h2>
+
+<p><strong>Prepare The Ingredients</strong></p>
+
+<p>You'll need to give the following some space on your local drive before
+we start doing anything cool:</p>
+
+<ul>
+<li> <em>python-setuptools</em> or <em>python-distribute</em>: A bunch of utility scripts
+ to install Python modules; available via your package manager.</li>
+<li> <em>Beanstalkd</em>: The Beanstalk queue server; <a href="http://kr.github.com/beanstalkd/download.html">download methods</a>
+ exist for most package managers, but I'd recommend cloning the most recent version from
+ the <a href="http://github.com/kr/beanstalkd">source at Github</a>.</li>
+<li> <em>Beanstalkc</em>: Python bindings for Beanstalkd; you'll need to get
+ this from the <a href="https://github.com/earl/beanstalkc">source</a>
+</li>
+<li> <em>python-yaml</em> or <em>pyYAML</em>: Python libraries to parse YAML matter;
+ available via your package manager.</li>
+</ul>
+<p><strong>Beanstalkd</strong></p>
+
+<p>If you've installed Beanstalkd using your package manager, you won't need
+to compile the sources. If not, you'll need to change into the source directory to
+compile the source and run tests:</p>
+
+<pre class="sunburst">
+  $ make
+  $ ./check.sh</pre>
+
+
+<p>Run the Beanstalk server on port 11300 (this is arbitrary) on your local host:</p>
+
+<pre class="sunburst">
+  $ beanstalkd -l 127.0.0.1 -p 11300</pre>
+
+
+<p><strong>Beanstalkc</strong></p>
+
+<p>You'll just need to switch to the Beanstalkc source directory and run the
+provided install script:</p>
+
+<pre class="sunburst">
+  $ sudo python setup.py install</pre>
+
+
+<p><strong>Testing The Combination</strong></p>
+
+<p>Fire up your Python REPL and mimic the statement flow in the listing below:</p>
+
+<pre class="sunburst">
+  <span class="Keyword">&gt;&gt;</span> <span class="Keyword">import</span> beanstalkc
+  <span class="Keyword">&gt;&gt;</span> bean <span class="Keyword">=</span> beanstalkc.Connection(<span class="Variable">host</span><span class="Keyword">=</span><span class="String"><span class="String">'</span>127.0.0.1<span class="String">'</span></span>, <span class="Variable">port</span><span class="Keyword">=</span><span class="Constant">11300</span>)
+  <span class="Keyword">&gt;&gt;</span> bean.put(<span class="String"><span class="String">'</span>Lala<span class="String">'</span></span>) 
+  <span class="Constant">1</span>
+  <span class="Keyword">&gt;&gt;</span> job <span class="Keyword">=</span> bean.reserve()
+  <span class="Constant">1</span>
+  <span class="Keyword">&gt;&gt;</span> job.body
+  Lala
+  <span class="Keyword">&gt;&gt;</span> job.delete()</pre>
+
+
+<p>That's it, you've just created your first distributed task queue! The listing
+above created a connection to the queue and added a new task; tasks in Beanstalkd
+are always strings, any non-string data you send across must be serialized. We
+then <em>reserve</em> a job from the queue, which is worker-slang for <em>"I'll work on this
+right now!"</em>. Once you've reserved your job, you can retrieve its <em>body</em> and
+pretend to do some work on it. When you're finished, you need to notify the
+Beanstalkd server by <em>deleting</em> the job from the queue. If a worker fails to
+delete a job, the worker is forsaken and its job is placed back onto the
+tail of the queue after a specified time interval.</p>
+
+<p><em><a href="#contents">Go back to the contents index</a></em></p>
+
+<p><a name="write-code"></a></p>
+
+<h2>Writing Some Code </h2>
+
+<p><strong>The Algorithm</strong></p>
+
+<p><img src="pi-monte-carlo-algorithm.gif" title="Estimating Pi by a Monte-Carlo algorithm"></p>
+
+<p>The code for the algorithm was derived from that presented in <a href="https://computing.llnl.gov/tutorials/parallel_comp/#ExamplesPI">Introduction to Parallel Computing</a>.
+It turns out to be embarassingly parallel, and hence, easily implementable in a master-worker setup:</p>
+
+<ul>
+<li><p> The master allocates to each worker the number of points to generate within the square.
+ The number of points is derived simply be splitting the total number of points we desire
+ among the number of workers we expect to have. More points lead to more accurate estimation.</p></li>
+<li><p>The worker receives the number of points it must generate from the master, and then generates
+   those points, or throws those darts into the square. It calculates the number of darts that land
+   within the circle and returns the ratio of that to the total number of darts back to the master.</p></li>
+</ul>
+<p><strong>System Design</strong></p>
+
+<p><img src="system-design.jpg" title="System design"></p>
+
+<p>The system follows a simple producer-consumer model. There are two queues; the one that the
+master <em>M</em> pushes to and workers consume from is called <em>message-for-worker</em>, and the one that
+the workers push to and the master consumes from is called <em>message-for-client</em>.</p>
+
+<p><em>M</em> accepts as a parameter <em>N</em> the number of darts to throw, and <em>W</em> as the
+number of workers it can expect to be active. It then splits the <em>N</em> darts equally among <em>W</em>
+workers and pushes each worker's quota to <em>message-for-worker</em>.</p>
+
+<p>Each worker consumes a single item <em>k</em> from <em>message-for-worker</em> and performs <em>f(k)</em>: throwing
+<em>k</em> darts into the square and then counting the number of darts <em>P<sub>i</sub></em> falling within
+the circle. Each worker pushes its <em>P<sub>i</sub></em> to <em>message-for-client</em>.</p>
+
+<p>The master waits for all workers to complete, and then sums all the workers' responses in
+<em>message-for-client</em>, divides by the total number of darts <em>N</em> and multiplies the resultant
+by four to get the estimated value of π.</p>
+
+<p><strong>The Client Code</strong></p>
+
+<p><em>The complete and most recent code can be retrieved from the <a href="https://github.com/emaadmanzoor/distributed-pi-estimation/">source</a></em></p>
+
+<p>The client code is easy to grok after having understood the algorithm it expresses and
+having read the <a href="https://github.com/earl/beanstalkc/blob/master/TUTORIAL.mkd">Beanstalkc tutorial</a>. The comments serve as pointers to Beanstalkd
+concepts that I've not explained in the prior sections</p>
+
+<pre class="sunburst">
+  <span class="Keyword">import</span> beanstalkc
+
+  QUEUE_TO_USE <span class="Keyword">=</span> <span class="String"><span class="String">"</span>msg_for_worker<span class="String">"</span></span>
+  QUEUE_TO_WATCH <span class="Keyword">=</span> <span class="String"><span class="String">"</span>msg_for_client<span class="String">"</span></span>
+  QUEUE_TO_IGNORE <span class="Keyword">=</span> <span class="String"><span class="String">"</span>default<span class="String">"</span></span></pre>
+
+
+<p>This binds variables to the names of our queues for convenience. <em>default</em> is a queue that
+is created by default by the Beanstalkd server, it would do us good to ignore it.</p>
+
+<pre class="sunburst">
+  N <span class="Keyword">=</span> <span class="Constant">10</span> <span class="Keyword">*</span><span class="Keyword">*</span> <span class="Constant">6</span>    <span class="Comment"><span class="Comment">#</span> Number of darts to throw in total</span>
+  K <span class="Keyword">=</span> <span class="Constant">2</span>          <span class="Comment"><span class="Comment">#</span> Number of jobs to split the work into</span>
+  TTR <span class="Keyword">=</span> <span class="Constant">40</span>       <span class="Comment"><span class="Comment">#</span> Deadline for jobs to complete (seconds)</span>
+
+  beanstalk <span class="Keyword">=</span> beanstalkc.Connection(<span class="Variable">host</span><span class="Keyword">=</span><span class="String"><span class="String">"</span>127.0.0.1<span class="String">"</span></span>, <span class="Variable">port</span><span class="Keyword">=</span><span class="Constant">11300</span>)
+
+  beanstalk.use(QUEUE_TO_USE)
+  beanstalk.watch(QUEUE_TO_WATCH)
+  beanstalk.ignore(QUEUE_TO_IGNORE)</pre>
+
+
+<p>The first triplet of lines is something you'll need to be aware of and adapt to your
+scenario. <em>N</em> is the total number of darts to throw, and directly affects the accuracy
+of your estimate and the computing power required. <em>K</em> needs to be set equal to the
+number of worker nodes you expect to see active. Leaving these unchanged won't break
+any functionality, but it will leave you taking long coffee breaks until you see any
+meaningful results.</p>
+
+<p>It also tells the Beanstalkd server which queues to <em>watch</em>, or consume from, <em>use</em>,
+or push to, and <em>ignore</em>, which takes on its literal meaning this time.</p>
+
+<pre class="sunburst">
+  use_queue_was_full <span class="Keyword">=</span> <span class="Constant">False</span>
+  <span class="Keyword">while</span> <span class="Constant">True</span>:  <span class="Comment"><span class="Comment">#</span> Block until the queue we push to is empty</span>
+      <span class="Keyword">if</span> (beanstalk.stats_tube(QUEUE_TO_USE)[<span class="String"><span class="String">"</span>current-jobs-ready<span class="String">"</span></span>]
+          <span class="Keyword">+</span> beanstalk.stats_tube(QUEUE_TO_USE)[<span class="String"><span class="String">"</span>current-jobs-reserved<span class="String">"</span></span>]) <span class="Keyword">==</span> <span class="Constant">0</span>:
+          <span class="Keyword">break</span>
+      <span class="Keyword">else</span>:
+          use_queue_was_full <span class="Keyword">=</span> <span class="Constant">True</span></pre>
+
+
+<p>This segment of code enables <a href="#fault-tolerance">server fault tolerance</a>, which we discuss
+in a later section.</p>
+
+<pre class="sunburst">
+  points_per_job <span class="Keyword">=</span> <span class="Support">int</span>(N <span class="Keyword">/</span> K)
+  <span class="Keyword">if</span> <span class="Keyword">not</span> use_queue_was_full:
+      <span class="Keyword">for</span> i <span class="Keyword">in</span> <span class="SupportFunction">range</span>(K):  <span class="Comment"><span class="Comment">#</span> Push all the jobs to the queue</span>
+          <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Put job<span class="String">"</span></span>, <span class="Support">str</span>(i), <span class="String"><span class="String">"</span>to job queue<span class="String">"</span></span>
+          beanstalk.put(<span class="Support">str</span>(points_per_job), <span class="Variable">ttr</span><span class="Keyword">=</span>TTR)
+      <span class="Keyword">print</span>
+
+  total_circle_count <span class="Keyword">=</span> <span class="Constant">0</span>
+  responses_received <span class="Keyword">=</span> <span class="Constant">0</span>
+  <span class="Keyword">for</span> i <span class="Keyword">in</span> <span class="SupportFunction">range</span>(K):
+      job <span class="Keyword">=</span> beanstalk.reserve()
+      responses_received <span class="Keyword">+=</span> <span class="Constant">1</span>
+      total_count <span class="Keyword">=</span> total_circle_count <span class="Keyword">+</span> <span class="Support">int</span>(job.body)
+      job.delete()
+      <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Received <span class="String">"</span></span> <span class="Keyword">+</span> <span class="Support">str</span>(responses_received) <span class="Keyword">+</span> <span class="String"><span class="String">"</span>/<span class="String">"</span></span> <span class="Keyword">+</span> <span class="Support">str</span>(K) <span class="Keyword">+</span> <span class="String"><span class="String">"</span> responses<span class="String">"</span></span>
+  beanstalk.close()</pre>
+
+
+<p>This segment pushes the worker quotas to the queue and waits for results. On
+receiving results, it accumulates them in a variable and then closes the connection
+to Beanstalkd.</p>
+
+<pre class="sunburst">
+  pi <span class="Keyword">=</span> (<span class="Constant">4.0</span> <span class="Keyword">*</span> total_count) <span class="Keyword">/</span> (responses_received <span class="Keyword">*</span> points_per_job)
+
+  <span class="Keyword">print</span>
+  <span class="Keyword">print</span> <span class="String"><span class="String">"</span>The value of pi is <span class="String">"</span></span> <span class="Keyword">+</span> <span class="Support">str</span>(pi)
+  <span class="Keyword">print</span> <span class="String"><span class="String">"</span>That took <span class="String">"</span></span>, <span class="Support">str</span>(time.time() <span class="Keyword">-</span> start_time), <span class="String"><span class="String">"</span> seconds!<span class="String">"</span></span></pre>
+
+
+<p>This uses the accumulated sum of the circle counts returned by the workers to
+compute the estimated value of π, in accordance with the algorithm described earlier.</p>
+
+<p><strong>The Worker Code</strong></p>
+
+<p><em>The complete and most recent code can be retrieved from the <a href="https://github.com/emaadmanzoor/distributed-pi-estimation/">source</a></em></p>
+
+<p>The worker code simply implements the algorithm in the context of the system, both of which
+have been described above. Most of the boilerplate matches that in the client, the differences
+have been briefly summarized below:n</p>
+
+<pre class="sunburst">
+  <span class="Keyword">while</span> <span class="Constant">True</span>:                             <span class="Comment"><span class="Comment">#</span> Indefinitely wait for jobs to do</span>
+
+      <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Connecting to job server...<span class="String">"</span></span>
+      beanstalk <span class="Keyword">=</span> beanstalkc.Connection(<span class="Variable">host</span><span class="Keyword">=</span><span class="String"><span class="String">'</span>127.0.0.1<span class="String">'</span></span>, <span class="Variable">port</span><span class="Keyword">=</span><span class="Constant">11300</span>)
+
+      beanstalk.watch(QUEUE_TO_WATCH)     <span class="Comment"><span class="Comment">#</span> Reserve jobs from this queue</span>
+      beanstalk.ignore(QUEUE_TO_IGNORE)   <span class="Comment"><span class="Comment">#</span> Ignore this queue for reservation</span>
+
+      <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Waiting for jobs...<span class="String">"</span></span>
+      job <span class="Keyword">=</span> beanstalk.reserve()           <span class="Comment"><span class="Comment">#</span> Blocks until a job is available</span></pre>
+
+
+<p>This makes our worker a <em>daemon</em> of sorts; it sits around indefinitely, waiting for jobs to
+do, and on completion of a job, goes back to waiting for the next job to work on.</p>
+
+<pre class="sunburst">
+  n <span class="Keyword">=</span> <span class="Support">int</span>(job.body)                   <span class="Comment"><span class="Comment">#</span> n = number of darts to throw</span>
+  start_time <span class="Keyword">=</span> time.time()
+
+  <span class="Comment"><span class="Comment">#</span> Algorithm Reference: Monte-Carlo estimation of Pi</span>
+  <span class="Comment"><span class="Comment">#</span> Source: https://computing.llnl.gov/tutorials/parallel_comp/#ExamplesPI</span>
+
+  square_edge <span class="Keyword">=</span> <span class="Constant">2.0</span>                    <span class="Comment"><span class="Comment">#</span> Square edge length</span>
+  center_x, center_y <span class="Keyword">=</span> <span class="Constant">1.0</span>, <span class="Constant">1.0</span>        <span class="Comment"><span class="Comment">#</span> Circle center coordinates</span>
+  radius <span class="Keyword">=</span> <span class="Constant">1.0</span>                         <span class="Comment"><span class="Comment">#</span> Circle radius</span>
+  circle_count <span class="Keyword">=</span> <span class="Constant">0</span>                     <span class="Comment"><span class="Comment">#</span> Counts points within the circle</span>
+
+  <span class="Keyword">print</span>
+  <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Generating<span class="String">"</span></span>, <span class="Support">str</span>(n), <span class="String"><span class="String">"</span>points...<span class="String">"</span></span>
+  <span class="Keyword">try</span>:
+      <span class="Keyword">for</span> i <span class="Keyword">in</span> <span class="Support">xrange</span>(n):
+          x <span class="Keyword">=</span> random.random() <span class="Keyword">*</span> square_edge        <span class="Comment"><span class="Comment">#</span> 0 &lt;= x &lt; square_edge</span>
+          y <span class="Keyword">=</span> random.random() <span class="Keyword">*</span> square_edge        <span class="Comment"><span class="Comment">#</span> 0 &lt;= y &lt; square_edge</span>
+          <span class="Keyword">if</span> (x <span class="Keyword">-</span> center_x) <span class="Keyword">*</span><span class="Keyword">*</span> <span class="Constant">2</span> <span class="Keyword">+</span> (y <span class="Keyword">-</span> center_y) <span class="Keyword">*</span><span class="Keyword">*</span> <span class="Constant">2</span> <span class="Keyword">&lt;</span><span class="Keyword">=</span> radius <span class="Keyword">*</span><span class="Keyword">*</span> <span class="Constant">2</span>:
+              circle_count <span class="Keyword">=</span> circle_count <span class="Keyword">+</span> <span class="Constant">1</span>
+  <span class="Keyword">except</span> <span class="Support">Exception</span>:
+      <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Job failed.<span class="String">"</span></span>, n
+      job.release()
+
+  beanstalk.use(QUEUE_TO_USE)         <span class="Comment"><span class="Comment">#</span> Push the calculated number of points</span>
+  beanstalk.put(<span class="Support">str</span>(circle_count))    <span class="Comment"><span class="Comment">#</span> in the circle to the client queue</span>
+
+  job.delete()                        <span class="Comment"><span class="Comment">#</span> Tell the job server you're done</span>
+  beanstalk.close()
+
+  <span class="Keyword">print</span> <span class="String"><span class="String">"</span>Finished job in<span class="String">"</span></span>, <span class="Support">str</span>(time.time() <span class="Keyword">-</span> start_time), <span class="String"><span class="String">"</span>seconds<span class="String">"</span></span>
+  <span class="Keyword">print</span></pre>
+
+
+<p>This simply implements the estimation algorithm discussed in an earlier section.
+The result of the algorithm is pushed to <em>QUEUE_TO_USE</em> by the worker.</p>
+
+<p><strong>Blast Off</strong></p>
+
+<p>Getting the code running involves simply running the worker Python script on a number
+of terminals to spawn as many workers as you need, and then starting the client Python
+code to farm out jobs to the workers. If you're attempting this in a distributed setup,
+ensure you make the necessary modifications in the server address and port.</p>
+
+<p><em><a href="#contents">Go back to the contents index</a></em></p>
+
+<p><a name="fault-tolerance"></a></p>
+
+<h2>Getting Fault Tolerant</h2>
+
+<p><strong>Worker Fault Tolerance</strong></p>
+
+<p>Worker fault tolerance is baked in to the Beanstalkd architecture. Workers work on
+jobs from the queue by <em>reserving</em> them. On completion, they are expected to <em>delete</em>
+the job from the queue, which is a way of notifying the server that it has completed
+its job. If, however, a worker fails to <em>delete</em> a job within a configurable time
+interval <em>TTR</em>, the job is re-added to the tail of the queue. Thus, in the worst case
+when all but one worker fail, the single worker will sequentially consume and work
+on all the items in its queue.</p>
+
+<p><strong>Server Fault Tolerance</strong></p>
+
+<p>To provide some form of persistence for the in-memory queue, Beanstalkd supports an
+option called <em>binlog</em>. Enabled with the <em>b <directory></directory></em> option to the Beanstalkd
+executable, this periodically stores the state of the queue to a flat file in the
+directory specified. On restarting from server failure with the <em>-b</em> switch, the
+in-memory queue is reconstructed from the files in this directory.</p>
+
+<p>However, to take advantage of server restarts and the <em>binlog</em>, the client code will
+need to be augmented with some failure-resume intelligence. In particular, the client
+must not re-push data into its queue if there exist items remaining from before the
+server failed. This is enabled with this bit of code in the client:</p>
+
+<pre class="sunburst">
+  use_queue_was_full <span class="Keyword">=</span> <span class="Constant">False</span>
+  <span class="Keyword">while</span> <span class="Constant">True</span>:  <span class="Comment"><span class="Comment">#</span> Block until the queue we push to is empty</span>
+      <span class="Keyword">if</span> (beanstalk.stats_tube(QUEUE_TO_USE)[<span class="String"><span class="String">"</span>current-jobs-ready<span class="String">"</span></span>]
+          <span class="Keyword">+</span> beanstalk.stats_tube(QUEUE_TO_USE)[<span class="String"><span class="String">"</span>current-jobs-reserved<span class="String">"</span></span>]) <span class="Keyword">==</span> <span class="Constant">0</span>:
+          <span class="Keyword">break</span>
+      <span class="Keyword">else</span>:
+          use_queue_was_full <span class="Keyword">=</span> <span class="Constant">True</span> </pre>
+
+
+<p>This uses Beanstalkd's statistics queries to gain information about the number of items
+in the queue it's pushing to. Until that queue is empty, it blocks and waits.</p>
+
+<p><em><a href="#contents">Go back to the contents index</a></em></p>
+
+<p><a name="reflections"></a></p>
+
+<h2>Reflections</h2>
+
+<p>I can't help reflecting on how difficult it was to predict when our nodes
+would turn nasty. Even though we were looking through layers of well organized
+cellophane; our <a href="https://github.com/emaadmanzoor/distributed-pi-estimation/">own code</a>, a <a href="https://github.com/kr/beanstalkd">minimalistic backbone</a> and simple socket IO.</p>
+
+<p>What if, instead, we were obliged to build an underground piping system
+for drinking water? With no web interface to monitor leaky hardware, no Nagios
+alerts when rodent miscreants chew threw your valves, and misbehaving pipes
+occasionally sharing their contents, causing much bowel discomfort for the
+townspeople.</p>
+
+<p>Not to mention you'd have to dig up a lot of mud to fix things.</p>
+
+<p><em><a href="#contents">Go back to the contents index</a></em></p>
+  </div>
+</div>
+      <div id="other-articles">
+        <div class="older">
+          <ul>
+<li>
+              <h3>
+                <a href="../../03/getting-things-done/" title="On getting things done.">
+                  « The Finish Line
+                </a>
+              </h3>
+            </li>
+          </ul>
+</div>
+        <div class="newer">
+          <ul>
+<li>
+              <h3>
+                <a href="../../../../2013/03/27/infinite-loops/" title="Differences in Scala and Clojure.">
+                  Infinite Loops »
+                </a>
+              </h3>
+            </li>
+          </ul>
+</div>
+      </div>
+      <div class="clear"></div>
+      <div class="comments">
+        <div id="disqus_thread"></div>
+        <script src="http://disqus.com/forums/eyeshalfclosed/embed.js" type="text/javascript"></script><noscript>
+          <a href="http://disqus.com/forums/eyeshalfclosed/?url=ref">
+            View the discussion thread
+          </a>
+        </noscript>
+      </div>
+      <!-- / disqus adds too much visual crap -->
+      <style type="text/css">
+        .dsq-dc-logo {
+          display: none !important; }
+      </style>
+<div id="page-footer">
+        Crafted with
+        <a href="http://nanoc.stoneship.org/">
+          nanoc
+        </a>
+         
+        ·
+         
+        Source on
+        <a href="http://github.com/emaadmanzoor/eyeshalfclosed/">
+          Github
+        </a>
+        <br>
+</div>
+    </div>
+    <script>
+      //<![CDATA[
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-36072775-1']);
+        _gaq.push(['_trackPageview']);
+        
+        (function() {
+          var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      //]]>
+    </script>
+</body>
+</html>
