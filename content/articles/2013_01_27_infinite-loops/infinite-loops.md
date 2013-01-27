@@ -194,11 +194,11 @@ This was unexpected. Where is our infinite loop?
 The culprit this time turns out to be *lazy evaluation*; a function is not
 evaluated to its value unless explicitly required. Clojure uses lazy evaluation
 by default, so instead of evaluating the function, it simply returns it to
-us, should we choose to explictly evaluate it later. In contrast, Scala
+us, should we choose to explicitly evaluate it later. In contrast, Scala
 begins evaluating the *loop* function within the if-condition and hence
 runs into an infinite loop.
 
-## Bonus Excercise: Lazy Evaluation In Haskell
+## Bonus Exercise: Lazy Evaluation In Haskell
 
 I don't know Haskell at all, but [this blog post][4] pointed out an important
 difference between lazy evaluation in Haskell and Clojure. Consider this
