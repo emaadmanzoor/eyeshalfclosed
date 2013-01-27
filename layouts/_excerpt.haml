@@ -1,9 +1,0 @@
----
----
-.excerpt
-  - url = "#{get_article_path(item)}"
-  %h2 
-    %a(href="#{url}" title="Full article" class="permalink")= "#{item[:title]}"
-  .body
-    %p
-      = item[:excerpt] || "!!! Missing excerpt metadata for <code>#{item[:file].path}</code>"
