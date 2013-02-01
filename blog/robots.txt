@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /assets/
 
-Sitemap: http://localhost:3000/sitemap.xml
+Sitemap: http://eyeshalfclosed.com/blog/sitemap.xml

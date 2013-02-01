@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://localhost:3000/search/</loc>
-    <lastmod>2013-01-27</lastmod>
-  </url>
-  <url>
-    <loc>http://localhost:3000/</loc>
-    <lastmod>2013-01-27</lastmod>
-  </url>
-  <url>
-    <loc>http://localhost:3000/2012/01/14/compiled-are-i/</loc>
-    <lastmod>2013-01-27</lastmod>
-  </url>
-  <url>
-    <loc>http://localhost:3000/2013/03/27/infinite-loops/</loc>
+    <loc>http://eyeshalfclosed.com/blog/search/</loc>
     <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2011/08/28/daisy-dog/typography.jpg</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2012/03/17/throwing-darts/</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/2012/01/14/compiled-are-i/</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2012/03/17/throwing-darts/system-design.jpg</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/2013/03/27/infinite-loops/</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2012/03/17/throwing-darts/pi-monte-carlo-algorithm.gif</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/2011/08/28/daisy-dog/typography.jpg</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2012/03/17/throwing-darts/system-design-src.ora</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/2012/03/03/getting-things-done/</loc>
-    <lastmod>2013-01-27</lastmod>
+    <loc>http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/system-design.jpg</loc>
+    <lastmod>2013-02-02</lastmod>
+  </url>
+  <url>
+    <loc>http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/pi-monte-carlo-algorithm.gif</loc>
+    <lastmod>2013-02-02</lastmod>
+  </url>
+  <url>
+    <loc>http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/system-design-src.ora</loc>
+    <lastmod>2013-02-02</lastmod>
+  </url>
+  <url>
+    <loc>http://eyeshalfclosed.com/blog/2012/03/03/getting-things-done/</loc>
+    <lastmod>2013-02-02</lastmod>
   </url>
 </urlset>
 
