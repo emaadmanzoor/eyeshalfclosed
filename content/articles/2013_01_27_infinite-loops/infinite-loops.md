@@ -218,6 +218,9 @@ the sorted array was never printed out. So the Haskell function took the lazy wa
 and did absolutely nothing, while C worked hard to sort a bunch of numbers that would
 never see the light of day.
 
+*Thanks to <a href="https://github.com/tribhuvanesh">@tribhuvanesh</a> and
+<a href="https://github.com/racheesingh/">@rachee_singh</a> for reviewing
+drafts of this.*
 [1]: https://class.coursera.org/progfun-2012-001/
 [2]: https://github.com/nathanmarz/storm/
 [3]: http://kafka.apache.org/
