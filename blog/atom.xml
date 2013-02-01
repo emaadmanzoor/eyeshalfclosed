@@ -1,34 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>http://eyeshalfclosed.com/blog/</id>
+  <id>http://localhost:3000/</id>
   <title>eyeshalfclosed</title>
   <updated>2013-03-26T18:30:00Z</updated>
-  <link rel="alternate" href="http://eyeshalfclosed.com/blog/"/>
+  <link rel="alternate" href="http://localhost:3000/"/>
   <link rel="self" href="http://feeds.feedburner.com/eyeshalfclosed"/>
   <author>
     <name>Emaad Ahmed Manzoor</name>
     <uri>http://eyeshalfclosed.com</uri>
   </author>
   <entry>
-    <id>tag:eyeshalfclosed.com,2013-03-27:/blog/2013/03/27/infinite-loops/</id>
+    <id>tag:localhost:3000,2013-03-27:/2013/03/27/infinite-loops/</id>
     <title type="html">Infinite Loops</title>
     <published>2013-03-26T18:30:00Z</published>
     <updated>2013-03-26T18:30:00Z</updated>
-    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2013/03/27/infinite-loops/"/>
-    <content type="html">&lt;p&gt;I draw to the end of my first week of Coursera's &lt;a href="https://class.coursera.org/progfun-2012-001/"&gt;Scala course&lt;/a&gt;. I have
-taken it up as a solitary student with a vengeance, armed with a new year's
-boost in morale since abandoning it midway last year. Expecting to blaze through
-the first few weeks, I had planned to work through the course using both Scala
-and Clojure and then churn out code walkthroughs of the &lt;a href="https://github.com/nathanmarz/storm/"&gt;Storm&lt;/a&gt; stream processing
-platform (a Clojure project) and the &lt;a href="http://kafka.apache.org/"&gt;Kafka&lt;/a&gt; message queue (a Scala project).&lt;/p&gt;
+    <link rel="alternate" href="http://localhost:3000/2013/03/27/infinite-loops/"/>
+    <content type="html">&lt;p&gt;My second attempt at Coursera's &lt;a href="https://class.coursera.org/progfun-2012-001/"&gt;Scala course&lt;/a&gt; turned out to have a
+refreshingly twisty plot. The grand plan this time is to blaze through the
+course using both Scala and Clojure, and then top it off by dishing out
+code reviews of &lt;a href="https://github.com/nathanmarz/storm/"&gt;Storm&lt;/a&gt; (Clojure) and &lt;a href="http://kafka.apache.org/"&gt;Kafka&lt;/a&gt; (Scala).&lt;/p&gt;
 
-&lt;p&gt;It turns out there are some important differences in the way these two functional
-languages work that are not skin-deep. This post documents the differences I found
-and investigated while writing infinite-recursive methods in Scala and Clojure.&lt;/p&gt;
+&lt;p&gt;I didn't expect the first week to hit me with a bunch of creepy differences
+in details that aren't skin-deep. How hard could it be to write an infinite
+loop, right?&lt;/p&gt;
 
 &lt;h2&gt;The Background: Function Evaluation&lt;/h2&gt;
 
-&lt;p&gt;This week was about some basic concepts and theory on the substitution model of
+&lt;p&gt;The week started with some basic concepts on the substitution model of
 function execution. In a nutshell, there are two ways a called function can
 be reduced to a value in the substitution model:&lt;/p&gt;
 
@@ -51,7 +49,7 @@ be reduced to a value in the substitution model:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt; &lt;strong&gt;Call-by-name:&lt;/strong&gt; Applies the function to unreduced arguments. The arguments
   are evaluated in the body of the function &lt;em&gt;if needed&lt;/em&gt;. This gives us a
-  convenient way to short-circuit reduction of a parameter if it is unused in
+  convenient way to short-circuit evaluation of a parameter if it is unused in
   the function body. An example series of reductions for this would be:&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -67,10 +65,10 @@ be reduced to a value in the substitution model:&lt;/p&gt;
 
 &lt;p&gt;Note that I have omitted some of the reduction steps for brevity.&lt;/p&gt;
 
-&lt;h2&gt;The Task: Infinite Recursion&lt;/h2&gt;
+&lt;h2&gt;The Plan: Infinite Recursion&lt;/h2&gt;
 
-&lt;p&gt;An in-class exercise was to write a function for the boolean-and of two variables without
-using the built-in primitives. The crux of this task was to remember the short-circuits:&lt;/p&gt;
+&lt;p&gt;An in-class exercise was to write a function performing the boolean-and of two variables
+without using the built-in primitives. The crux was about remembering the short-circuits:&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
   true &lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt;&lt;span class="Keyword"&gt;&amp;amp;&lt;/span&gt; Y &lt;span class="Keyword"&gt;==&lt;/span&gt; Y
@@ -96,7 +94,7 @@ using the built-in primitives. The crux of this task was to remember the short-c
 a &lt;em&gt;val&lt;/em&gt;, the right-hand-side of the assignment is evaluated only when the function is
 called. &lt;em&gt;val&lt;/em&gt;, in contrast, evaluates the right-hand-side at definition time.&lt;/p&gt;
 
-&lt;p&gt;Now if we provide this function as an argument to our and-function, we see the following
+&lt;p&gt;Now if we provide this function as an argument to our boolean-and'er, we see the following
 reduction happening (remember that Scala reduces by-value):&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
@@ -105,8 +103,8 @@ reduction happening (remember that Scala reduces by-value):&lt;/p&gt;
 &lt;/pre&gt;
 
 
-&lt;p&gt;What we would expect is a short-circuit as soon as we see a false first argument. To
-achieve this, we can coax Scala into reducing a particular argument by-name instead:&lt;/p&gt;
+&lt;p&gt;What we'd like is to not evaluate the second parameter at all if the first is false.
+To achieve this, we can coax Scala into reducing a particular argument by-name instead:&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
   &lt;span class="Storage"&gt;def&lt;/span&gt; &lt;span class="Entity"&gt;and2&lt;/span&gt;(x: &lt;span class="Variable"&gt;Boolean&lt;/span&gt;, y:=&amp;gt; &lt;span class="Variable"&gt;Boolean&lt;/span&gt;) = if (&lt;span class="Variable"&gt;x&lt;/span&gt;) y else &lt;span class="Variable"&gt;false&lt;/span&gt;
@@ -125,7 +123,7 @@ achieve this, we can coax Scala into reducing a particular argument by-name inst
 &lt;p&gt;The infinite &lt;em&gt;loop&lt;/em&gt; is never evaluated, since we have forced Scala to evaluate the
 second parameter by-name instead of by-value. Hence, we achieve our desired behaviour.&lt;/p&gt;
 
-&lt;h2&gt;The Divide I: Infinite Loops&lt;/h2&gt;
+&lt;h2&gt;The Twist I: TCO&lt;/h2&gt;
 
 &lt;p&gt;Translating this functionality to Clojure seemed trivial until I slammed into some
 odd behaviour. To start with, let's write an innocent infinite loop function:&lt;/p&gt;
@@ -143,15 +141,15 @@ odd behaviour. To start with, let's write an innocent infinite loop function:&lt
 &lt;/pre&gt;
 
 
-&lt;p&gt;Unexpected, right? I was stumped! After a while being a headless chicken
-burrowing into the details of function argument reduction in Clojure, I
+&lt;p&gt;Unexpected, right? I was stumped! After some headless-chicken-scrambling
+into the details of function argument reduction in Clojure, I
 stumbled onto &lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion"&gt;this illuminating blog post&lt;/a&gt;, comparing infinite loops
 in a number of languages. The sneaky culprit turned out to be
-&lt;em&gt;tail-call optimization&lt;/em&gt;.&lt;/p&gt;
+TCO, or &lt;em&gt;tail-call optimization&lt;/em&gt;.&lt;/p&gt;
 
 &lt;h3&gt;Tail-Call Optimization&lt;/h3&gt;
 
-&lt;p&gt;Let's see what this means by a simple reduction example, applied to calculating
+&lt;p&gt;Let's look at what this means by a simple reduction example, applied to calculating
 the sum of ones upto &lt;em&gt;N&lt;/em&gt;. Here is the non-tail-call-optimized reduction:&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
@@ -168,14 +166,13 @@ the sum of ones upto &lt;em&gt;N&lt;/em&gt;. Here is the non-tail-call-optimized
 &lt;/pre&gt;
 
 
-&lt;p&gt;Observe how the chain of execution gets wider with increasing &lt;em&gt;N&lt;/em&gt;. Each function call,
-is appended to the call stack. Once the last function has been reduced, only then is
-the stack collapsed by subsequently reducing each function. The function &lt;em&gt;sumToN&lt;/em&gt;
-has a &lt;em&gt;tail call&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Observe how the chain of execution gets wider with increasing &lt;em&gt;N&lt;/em&gt;. Each function call
+is appended to the call stack. Only when the last function is reduced does
+the stack get collapsed by subsequently reducing each function.&lt;/p&gt;
 
-&lt;p&gt;Our &lt;em&gt;sumToN&lt;/em&gt; function can be optimized by simply
-adding an additional accumulator parameter. This parameter, along with the current
-&lt;em&gt;N&lt;/em&gt; value, maintains the &lt;em&gt;state&lt;/em&gt; of the function evaluation at that instant.&lt;/p&gt;
+&lt;p&gt;Our &lt;em&gt;sumToN&lt;/em&gt; function can be tail-call-optimized by simply adding an additional
+laccumulator parameter. This parameter, along with the current &lt;em&gt;N&lt;/em&gt; value, maintains
+the &lt;em&gt;state&lt;/em&gt; of the function evaluation at that instant.&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
   sumToN(&lt;span class="Constant"&gt;0&lt;/span&gt;, &lt;span class="Constant"&gt;5&lt;/span&gt;)
@@ -193,11 +190,11 @@ accumulates a constant amount of space on the call stack for any &lt;em&gt;N&lt;
 
 &lt;h3&gt;Scala Does Tail-Call Optimization By Default&lt;/h3&gt;
 
-&lt;p&gt;And this happens automatically. This is why the Scala infinite loop function we wrote
-earlier actually executed infinitely. In contrast, Clojure does not, and the infinite
-function additions to the call stack eventually triggers a stack overflow.&lt;/p&gt;
+&lt;p&gt;And this happens really quietly. This is why the Scala infinite loop function we wrote
+earlier actually executed infinitely. In contrast, the Clojure one never runs, and the
+infinite function additions to the call stack eventually trigger a stack overflow.&lt;/p&gt;
 
-&lt;h2&gt;The Divide II: Lazy Evaluation&lt;/h2&gt;
+&lt;h2&gt;The Twist II: Lazy Evaluation&lt;/h2&gt;
 
 &lt;p&gt;To mimic Scala's behaviour, let's enforce tail-call optimization in Clojure:&lt;/p&gt;
 
@@ -206,7 +203,7 @@ function additions to the call stack eventually triggers a stack overflow.&lt;/p
 &lt;/pre&gt;
 
 
-&lt;p&gt;Now let's write an &lt;em&gt;and&lt;/em&gt; method and try the same exercise we did in Scala:&lt;/p&gt;
+&lt;p&gt;Now let's try the same boolean-and'ing exercise we did in Scala:&lt;/p&gt;
 
 &lt;pre class="sunburst"&gt;
   user=&amp;gt; (defn and2 [x y] (&lt;span class="Keyword"&gt;if&lt;/span&gt; (= x true) y false))
@@ -218,18 +215,18 @@ function additions to the call stack eventually triggers a stack overflow.&lt;/p
 &lt;/pre&gt;
 
 
-&lt;p&gt;This was unexpected. Where is our infinite loop?&lt;/p&gt;
+&lt;p&gt;What did it just dump out on our feet? Where is our infinite loop?&lt;/p&gt;
 
 &lt;p&gt;The culprit this time turns out to be &lt;em&gt;lazy evaluation&lt;/em&gt;; a function is not
-evaluated to its value unless explicitly required. Clojure uses lazy evaluation
+evaluated to its return value unless explicitly asked to. Clojure uses lazy evaluation
 by default, so instead of evaluating the function, it simply returns it to
 us, should we choose to explicitly evaluate it later. In contrast, Scala
 begins evaluating the &lt;em&gt;loop&lt;/em&gt; function within the if-condition and hence
-runs into an infinite loop.&lt;/p&gt;
+runs into an infinite loop. That weird dump is a representation of our Clojure function.&lt;/p&gt;
 
-&lt;h2&gt;Bonus Exercise: Lazy Evaluation In Haskell&lt;/h2&gt;
+&lt;h2&gt;Bonus Twist: Really Lazy Evaluation&lt;/h2&gt;
 
-&lt;p&gt;I don't know Haskell at all, but &lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion"&gt;this blog post&lt;/a&gt; pointed out an important
+&lt;p&gt;Another interesting fact a comment in &lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion"&gt;this blog post&lt;/a&gt; pointed out was an important
 difference between lazy evaluation in Haskell and Clojure. Consider this
 Haskell infinitely-recursive function:&lt;/p&gt;
 
@@ -241,19 +238,24 @@ Haskell infinitely-recursive function:&lt;/p&gt;
 &lt;p&gt;When you call this function, it blocks infinitely, as expected. But in contrast
 to Clojure and Scala's infinite loops, this one uses no CPU! Why?&lt;/p&gt;
 
-&lt;p&gt;I'll quote the explanation provided in the comments to the original blog post here:&lt;/p&gt;
+&lt;p&gt;It turns out Haskell is &lt;em&gt;extremely lazy&lt;/em&gt;. Since our function doesn't really do anything,
+it's never really executed. You could simply print something to the screen within the
+function to set Haskell on fire, but it won't budge until you do so.&lt;/p&gt;
 
-&lt;blockquote&gt;&lt;p&gt;Haskell has lazy evaluation and call-by-need semantics. Since you aren't doing anything with your forever function, it will never get evaluated. You have to enforce strict evaluation, by e.g. printing it out. (The same mistake is done on the Computer Language Benchmark Game. There's an Array sorting benchmark where Haskell just blows away even hand-optimized C. The secret is that the benchmark never prints out the contents of the sorted array. The C compiler isn't smart enough to recognize that the array is never actually used anywhere, but Haskell is, and so the entire benchmark basically compiles down to the equivalent of "int main() { return 0; }".)
-&lt;cite&gt;&lt;a href="http://paulbarry.com/articles/2009/09/02/infinite-recursion#comment-5326"&gt;Jörg W Mittag&lt;/a&gt;&lt;/cite&gt;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;The &lt;a href="http://benchmarksgame.alioth.debian.org/"&gt;Computer Language Benchmark Game&lt;/a&gt; fell into Haskell's lazy trap once, when
+the array sorting benchmark in Haskell outperformed hand-optimized C. It turned out that
+the sorted array was never printed out. So the Haskell function took the smart way out
+and did nothing, while C worked hard to sort a bunch of numbers that would never see the
+light of day.&lt;/p&gt;
 </content>
-    <summary type="html">Differences in Scala and Clojure.</summary>
+    <summary type="html">Embodiments in Scala, Clojure and Haskell.</summary>
   </entry>
   <entry>
-    <id>tag:eyeshalfclosed.com,2012-03-17:/blog/2012/03/17/throwing-darts/</id>
+    <id>tag:localhost:3000,2012-03-17:/2012/03/17/throwing-darts/</id>
     <title type="html">Throwing Darts</title>
     <published>2012-03-16T18:30:00Z</published>
     <updated>2012-03-16T18:30:00Z</updated>
-    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/03/17/throwing-darts/"/>
+    <link rel="alternate" href="http://localhost:3000/2012/03/17/throwing-darts/"/>
     <content type="html">&lt;p&gt;&lt;strong&gt;Update: November 6, 2012:&lt;/strong&gt; We further organized the content of this post and
 conducted a 3-hour &lt;a href="http://in.pycon.org/2012/funnel/pyconindia2012/55-simple-linux-cluster-with-python-and-beanstalkd"&gt;tutorial&lt;/a&gt;
 at PyCon India 2012. The source code and tutorial slides are available on our
@@ -713,11 +715,11 @@ townspeople.&lt;/p&gt;
     <summary type="html">Estimating π on a beanstalkd cluster.</summary>
   </entry>
   <entry>
-    <id>tag:eyeshalfclosed.com,2012-03-03:/blog/2012/03/03/getting-things-done/</id>
+    <id>tag:localhost:3000,2012-03-03:/2012/03/03/getting-things-done/</id>
     <title type="html">The Finish Line</title>
     <published>2012-03-02T18:30:00Z</published>
     <updated>2012-03-02T18:30:00Z</updated>
-    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/03/03/getting-things-done/"/>
+    <link rel="alternate" href="http://localhost:3000/2012/03/03/getting-things-done/"/>
     <content type="html">&lt;p&gt;&lt;strong&gt;I need to follow the breadcrumbs back.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;In the excitement and belief that it's always a good thing,
@@ -763,11 +765,11 @@ I start building the wholes to which they belong.&lt;/p&gt;
     <summary type="html">On getting things done.</summary>
   </entry>
   <entry>
-    <id>tag:eyeshalfclosed.com,2012-01-14:/blog/2012/01/14/compiled-are-i/</id>
+    <id>tag:localhost:3000,2012-01-14:/2012/01/14/compiled-are-i/</id>
     <title type="html">Compiled Are I</title>
     <published>2012-01-13T18:30:00Z</published>
     <updated>2012-01-13T18:30:00Z</updated>
-    <link rel="alternate" href="http://eyeshalfclosed.com/blog/2012/01/14/compiled-are-i/"/>
+    <link rel="alternate" href="http://localhost:3000/2012/01/14/compiled-are-i/"/>
     <content type="html">&lt;blockquote&gt;&lt;p&gt;While I’m not specifically trained as an author of prose,
 I &lt;em&gt;am&lt;/em&gt; trained as an author of code. What would happen if
 I approached blogging from a software development perspective?
