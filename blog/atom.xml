@@ -247,6 +247,10 @@ the array sorting benchmark in Haskell outperformed hand-optimized C. It turned 
 the sorted array was never printed out. So the Haskell function took the lazy way out
 and did absolutely nothing, while C worked hard to sort a bunch of numbers that would
 never see the light of day.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Thanks to &lt;a href="https://github.com/tribhuvanesh"&gt;@tribhuvanesh&lt;/a&gt; and
+&lt;a href="https://github.com/racheesingh/"&gt;@rachee_singh&lt;/a&gt; for reviewing
+drafts of this.&lt;/em&gt;&lt;/p&gt;
 </content>
     <summary type="html">Embodiments in Scala, Clojure and Haskell.</summary>
   </entry>
