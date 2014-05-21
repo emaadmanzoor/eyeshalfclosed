@@ -4,6 +4,8 @@ data_sources:
 - type: filesystem_unified
   items_root: /
   layouts_root: /
+  config:
+      encoding: utf-8
 enable_output_diff: false
 base_url: http://localhost:3000
 google_analytics:
